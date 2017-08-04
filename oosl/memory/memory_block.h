@@ -15,7 +15,7 @@ namespace oosl{
 
 			enum class attribute_type : unsigned int{
 				nil					= (0 << 0x0000),
-				allocated			= (1 << 0x0000),
+				not_allocated		= (1 << 0x0000),
 				immutable			= (1 << 0x0001),
 				tls					= (1 << 0x0002),
 				indirect			= (1 << 0x0003),

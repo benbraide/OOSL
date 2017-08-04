@@ -16,7 +16,7 @@ namespace oosl{
 
 			virtual ~watcher() = default;
 
-			virtual void on_change(const range_type &range, uint64_type address) = 0;
+			virtual void on_change(const range_type &range, const range_type &changed) = 0;
 		};
 	}
 }

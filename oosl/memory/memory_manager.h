@@ -14,6 +14,7 @@
 
 #include "../common/lock_once.h"
 #include "../common/error_codes.h"
+#include "../common/random_number.h"
 
 #include "memory_dependency.h"
 #include "memory_watcher.h"
@@ -47,7 +48,9 @@ namespace oosl{
 			typedef common::lock_once<lock_type> lock_once_type;
 
 			typedef decltype(&lock_type::lock_shared) shared_locker_type;
+
 			typedef common::error_codes error_codes_type;
+			typedef common::basic_random_number<uint64_type> random_engine_type;
 
 			enum class state_type : unsigned int{
 				nil					= (0 << 0x0000),
@@ -72,6 +75,10 @@ namespace oosl{
 			void leave_protected_mode();
 
 			void on_thread_exit();
+
+			uint64_type add_watcher(const watcher_range_type &range, watcher_ptr_type value);
+
+			void remove_watcher(uint64_type id);
 
 			void capture_tls(uint64_type address, block *memory_block);
 
@@ -109,6 +116,8 @@ namespace oosl{
 
 			block *find_enclosing_block(uint64_type address);
 
+			watcher *find_watcher_by_id(uint64_type id);
+
 			bool is_torn() const;
 
 			bool is_protected_mode() const;
@@ -118,6 +127,8 @@ namespace oosl{
 			static const shared_locker_type shared_locker;
 
 		private:
+			block *allocate_(size_type size, uint64_type address, bool tls);
+
 			template <typename value_type>
 			block *allocate_scalar_(const value_type *value, size_type count){
 				lock_once_type guard(lock_);
@@ -135,9 +146,13 @@ namespace oosl{
 
 			void pre_write_(block &memory_block);
 
+			void write_(uint64_type address, const char *source, size_type size, bool is_array);
+
 			void add_available_(uint64_type value, size_type size);
 
 			uint64_type find_available_(size_type size, uint64_type match = 0ull);
+
+			void call_watchers_(const watcher_range_type &range);
 
 			void str_cpy_(char *destination, const char *source, size_type count);
 
@@ -153,10 +168,9 @@ namespace oosl{
 
 			state_type states_;
 			lock_type lock_;
+			random_engine_type random_engine_;
 
 			static thread_local block_list_type tls_blocks_;
-			static thread_local watcher_list_type tls_watchers_;
-
 			static thread_local bool is_protected_;
 		};
 

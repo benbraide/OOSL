@@ -39,6 +39,14 @@ namespace oosl{
 				return !(*this < rhs || *this == rhs);
 			}
 
+			bool contains(const range &rhs) const{
+				return (contains(rhs.left_) && contains(rhs.right_));
+			}
+
+			bool contains(value_type value) const{
+				return (value >= left_ && value <= right_);
+			}
+
 			bool intercepts(const range &rhs) const{
 				return ((left_ <= rhs.left_ && rhs.left_ <= right_) ||
 					(left_ <= rhs.right_ && rhs.right_ <= right_));
