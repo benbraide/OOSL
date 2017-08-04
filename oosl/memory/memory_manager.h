@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "../common/lock_once.h"
+#include "../common/error_codes.h"
 
 #include "memory_dependency.h"
 #include "memory_watcher.h"
@@ -25,13 +26,8 @@ namespace oosl{
 			typedef block::uint64_type uint64_type;
 			typedef block::size_type size_type;
 
-			struct available_info{
-				size_type size;
-				char *ptr;
-			};
-
 			typedef std::unordered_map<uint64_type, block> block_list_type;
-			typedef std::map<uint64_type, available_info> available_list_type;
+			typedef std::map<uint64_type, size_type> available_list_type;
 
 			typedef std::unordered_map<uint64_type, block> tls_list_type;
 
@@ -51,11 +47,18 @@ namespace oosl{
 			typedef common::lock_once<lock_type> lock_once_type;
 
 			typedef decltype(&lock_type::lock_shared) shared_locker_type;
+			typedef common::error_codes error_codes_type;
 
 			enum class state_type : unsigned int{
 				nil					= (0 << 0x0000),
 				torn				= (1 << 0x0000),
 				protected_mode		= (1 << 0x0001),
+			};
+
+			enum class deallocation_option : unsigned int{
+				nil					= (0 << 0x0000),
+				no_merge			= (1 << 0x0000),
+				no_throw			= (1 << 0x0001),
 			};
 
 			explicit manager(uint64_type protected_range = 0ull);
@@ -72,6 +75,36 @@ namespace oosl{
 
 			void capture_tls(uint64_type address, block *memory_block);
 
+			void deallocate(uint64_type address, deallocation_option options = deallocation_option::nil);
+
+			uint64_type reserve(size_type size);
+
+			block *allocate(size_type size, uint64_type address = 0ull);
+
+			block *allocate_contiguous(size_type count, size_type size);
+
+			template <typename value_type>
+			block *allocate_scalar(value_type value){
+				lock_once_type guard(lock_);
+				auto entry = allocate(sizeof(value_type));
+
+				OOSL_SET(entry->attributes, attribute_type::immutable);
+				str_cpy_(entry->ptr, reinterpret_cast<const char *>(&value), entry->size);
+
+				return entry;
+			}
+
+			template <typename value_type>
+			block *allocate_scalar(const value_type *value, size_type count){
+				return allocate_scalar_(value, count);
+			}
+
+			block *allocate_scalar(const char *value, size_type count = 0u);
+
+			block *allocate_scalar(const wchar_t *value, size_type count = 0u);
+
+			block *reallocate(uint64_type address, size_type size);
+
 			block *find_block(uint64_type address);
 
 			block *find_enclosing_block(uint64_type address);
@@ -85,9 +118,28 @@ namespace oosl{
 			static const shared_locker_type shared_locker;
 
 		private:
+			template <typename value_type>
+			block *allocate_scalar_(const value_type *value, size_type count){
+				lock_once_type guard(lock_);
+				auto entry = allocate(count * sizeof(value_type));
+
+				OOSL_SET(entry->attributes, attribute_type::immutable);
+				str_cpy_(entry->ptr, (const char *)value, entry->size);
+
+				return entry;
+			}
+
 			block *initialize_tls_(block &memory_block);
 
 			block *find_enclosing_block_(block_list_type &blocks, uint64_type address);
+
+			void pre_write_(block &memory_block);
+
+			void add_available_(uint64_type value, size_type size);
+
+			uint64_type find_available_(size_type size, uint64_type match = 0ull);
+
+			void str_cpy_(char *destination, const char *source, size_type count);
 
 			uint64_type protected_;
 			uint64_type next_address_;
@@ -109,6 +161,7 @@ namespace oosl{
 		};
 
 		OOSL_MAKE_OPERATORS(manager::state_type);
+		OOSL_MAKE_OPERATORS(manager::deallocation_option);
 	}
 }
 
