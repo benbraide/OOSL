@@ -30,15 +30,10 @@ namespace oosl{
 				char *ptr;
 			};
 
-			struct tls_info{
-				uint64_type address;
-				char *ptr;
-			};
-
 			typedef std::unordered_map<uint64_type, block> block_list_type;
 			typedef std::map<uint64_type, available_info> available_list_type;
 
-			typedef std::list<tls_info> tls_list_type;
+			typedef std::unordered_map<uint64_type, block> tls_list_type;
 
 			typedef std::shared_ptr<dependency> dependency_ptr_type;
 			typedef std::unordered_map<uint64_type, dependency_ptr_type> dependency_list_type;
@@ -57,28 +52,63 @@ namespace oosl{
 
 			typedef decltype(&lock_type::lock_shared) shared_locker_type;
 
+			enum class state_type : unsigned int{
+				nil					= (0 << 0x0000),
+				torn				= (1 << 0x0000),
+				protected_mode		= (1 << 0x0001),
+			};
+
 			explicit manager(uint64_type protected_range = 0ull);
 
 			~manager();
 
+			void tear();
+
+			void enter_protected_mode();
+
+			void leave_protected_mode();
+
+			void on_thread_exit();
+
+			void capture_tls(uint64_type address, block *memory_block);
+
+			block *find_block(uint64_type address);
+
+			block *find_enclosing_block(uint64_type address);
+
+			bool is_torn() const;
+
+			bool is_protected_mode() const;
+
+			bool is_protected(uint64_type address) const;
+
 			static const shared_locker_type shared_locker;
 
 		private:
-			uint64_type next_;
-			uint64_type protected_;
+			block *initialize_tls_(block &memory_block);
 
-			block_list_type blocks_;
+			block *find_enclosing_block_(block_list_type &blocks, uint64_type address);
+
+			uint64_type protected_;
+			uint64_type next_address_;
+
+			block_list_type *blocks_;
 			tls_list_type tls_captures_;
 
 			available_list_type available_list_;
 			dependency_list_type dependencies_;
 			watcher_list_type watchers_;
 
+			state_type states_;
 			lock_type lock_;
 
 			static thread_local block_list_type tls_blocks_;
 			static thread_local watcher_list_type tls_watchers_;
+
+			static thread_local bool is_protected_;
 		};
+
+		OOSL_MAKE_OPERATORS(manager::state_type);
 	}
 }
 

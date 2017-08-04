@@ -14,10 +14,11 @@ namespace oosl{
 			typedef std::size_t size_type;
 
 			enum class attribute_type : unsigned int{
-				nil				= (0 << 0x0000),
-				allocated		= (1 << 0x0000),
-				immutable		= (1 << 0x0001),
-				tls				= (1 << 0x0002),
+				nil					= (0 << 0x0000),
+				allocated			= (1 << 0x0000),
+				immutable			= (1 << 0x0001),
+				tls					= (1 << 0x0002),
+				has_dependency		= (1 << 0x0003),
 			};
 
 			size_type ref_count;
