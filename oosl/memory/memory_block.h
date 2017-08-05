@@ -19,6 +19,10 @@ namespace oosl{
 				immutable			= (1 << 0x0001),
 				tls					= (1 << 0x0002),
 				indirect			= (1 << 0x0003),
+				numeric				= (1 << 0x0004),
+				floating_point		= (1 << 0x0005),
+				unsigned_integer	= (1 << 0x0006),
+				long_double			= (1 << 0x0007),
 			};
 
 			size_type ref_count;

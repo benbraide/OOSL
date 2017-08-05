@@ -24,6 +24,16 @@ void oosl::memory::manager::leave_protected_mode(){
 void oosl::memory::manager::on_thread_exit(){
 	if (is_torn())
 		return;
+
+	auto &blocks = tls_blocks_;
+	for (auto &entry : blocks){//Free thread local storage
+		deallocate(entry.second.address);
+		if (entry.second.ptr != nullptr){
+			if (OOSL_IS(entry.second.attributes, attribute_type::indirect))
+				deallocate(*reinterpret_cast<uint64_type *>(entry.second.ptr));//Deallocate linked memory
+			delete[] entry.second.ptr;
+		}
+	}
 }
 
 oosl::memory::manager::uint64_type oosl::memory::manager::add_watcher(const watcher_range_type &range, watcher_ptr_type value){
@@ -205,6 +215,56 @@ oosl::memory::block *oosl::memory::manager::reallocate(uint64_type address, size
 	return entry;
 }
 
+void oosl::memory::manager::fill(uint64_type address, char source, size_type count){
+	write_(address, &source, count, false);
+}
+
+void oosl::memory::manager::copy(uint64_type destination, uint64_type source, size_type size){
+	lock_once_type guard(lock_, shared_locker);
+
+	block *entry = nullptr;
+	size_type available_size = 0u, target_size = 0u, ptr_index = 0u;
+
+	while (size > 0u){
+		if ((entry = (entry == nullptr) ? find_enclosing_block(source) : find_block(source)) != nullptr){
+			ptr_index = static_cast<size_type>(source - entry->address);
+			available_size = (entry->actual_size - ptr_index);
+		}
+		else//No next block
+			throw common::error_codes::read_violation;
+
+		target_size = (available_size < size) ? available_size : size;
+		write_(destination, entry->ptr + ptr_index, target_size, true);
+
+		source += target_size;
+		destination += target_size;
+		size -= target_size;
+	}
+}
+
+void oosl::memory::manager::read(uint64_type address, char *buffer, size_type size){
+	lock_once_type guard(lock_, shared_locker);
+
+	block *entry = nullptr;
+	size_type available_size = 0u, min_size = 0u, ptr_index = 0u;
+
+	while (size > 0u){
+		if ((entry = (entry == nullptr) ? find_enclosing_block(address) : find_block(address)) != nullptr){//Get next block
+			ptr_index = static_cast<size_type>(address - entry->address);
+			available_size = (entry->actual_size - ptr_index);
+		}
+		else//No next block
+			throw common::error_codes::read_violation;
+
+		min_size = (available_size < size) ? available_size : size;
+		std::strncpy(buffer, entry->ptr, min_size);//Read block
+
+		buffer += min_size;
+		address += min_size;
+		size -= min_size;
+	}
+}
+
 oosl::memory::block *oosl::memory::manager::find_block(uint64_type address){
 	if (is_torn())
 		return nullptr;
@@ -309,7 +369,10 @@ oosl::memory::block *oosl::memory::manager::allocate_(size_type size, uint64_typ
 
 oosl::memory::block *oosl::memory::manager::initialize_tls_(block &memory_block){
 	auto entry = allocate_(memory_block.actual_size, 0ull, true);
+
+	entry->attributes = OOSL_SET_V(memory_block.attributes, attribute_type::tls);
 	std::strncpy(entry->ptr, memory_block.ptr, entry->actual_size);
+
 	return entry;
 }
 
@@ -334,6 +397,7 @@ void oosl::memory::manager::pre_write_(block &memory_block){
 }
 
 void oosl::memory::manager::write_(uint64_type address, const char *source, size_type size, bool is_array){
+	lock_once_type guard(lock_, shared_locker);
 	if (size == 0u)
 		return;
 

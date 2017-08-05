@@ -11,6 +11,7 @@ namespace oosl{
 			invalid_address,
 			read_violation,
 			write_violation,
+			invalid_memory_size,
 		};
 	}
 }
