@@ -1,3 +1,8 @@
+#include "test/test_runner.h"
+#include "test/test_memory_manager.h"
+
 int main(){
-	return 0;
+	auto result = oosl::test::run("memory manager test");
+
+	return result;
 }
