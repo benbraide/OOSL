@@ -18,6 +18,7 @@
 
 #include "memory_dependency.h"
 #include "memory_watcher.h"
+#include "memory_tls_thunk.h"
 
 namespace oosl{
 	namespace memory{
@@ -28,9 +29,8 @@ namespace oosl{
 			typedef block::size_type size_type;
 
 			typedef std::unordered_map<uint64_type, block> block_list_type;
+			typedef std::unordered_map<uint64_type, block *> block_ptr_list_type;
 			typedef std::map<uint64_type, size_type> available_list_type;
-
-			typedef std::unordered_map<uint64_type, block> tls_list_type;
 
 			typedef std::shared_ptr<dependency> dependency_ptr_type;
 			typedef std::unordered_map<uint64_type, dependency_ptr_type> dependency_list_type;
@@ -40,6 +40,9 @@ namespace oosl{
 
 			typedef std::unordered_map<uint64_type, watcher_ptr_type> watchers_map_type;
 			typedef std::map<watcher_range_type, watchers_map_type> watcher_list_type;
+
+			typedef std::shared_ptr<tls_thunk> tls_thunk_ptr_type;
+			typedef std::list<tls_thunk_ptr_type> tls_thunk_ptr_list_type;
 
 			typedef std::thread thread_type;
 			typedef thread_type::id thread_id_type;
@@ -74,13 +77,19 @@ namespace oosl{
 
 			void leave_protected_mode();
 
+			void on_thread_entry();
+
 			void on_thread_exit();
+
+			void add_dependency(uint64_type address, dependency_ptr_type value);
+
+			void remove_dependency(uint64_type address);
 
 			uint64_type add_watcher(const watcher_range_type &range, watcher_ptr_type value);
 
 			void remove_watcher(uint64_type id);
 
-			void capture_tls(uint64_type address, block *memory_block);
+			void capture_tls(tls_thunk_ptr_type thunk);
 
 			void deallocate(uint64_type address, deallocation_option options = deallocation_option::nil);
 
@@ -281,8 +290,6 @@ namespace oosl{
 			static const shared_locker_type shared_locker;
 
 		private:
-			block *allocate_(size_type size, uint64_type address, bool tls);
-
 			template <typename value_type>
 			block *allocate_scalar_(const value_type *value, size_type count){
 				lock_once_type guard(lock_);
@@ -293,10 +300,6 @@ namespace oosl{
 
 				return entry;
 			}
-
-			block *initialize_tls_(block &memory_block);
-
-			block *find_enclosing_block_(block_list_type &blocks, uint64_type address);
 
 			void pre_write_(block &memory_block);
 
@@ -324,8 +327,8 @@ namespace oosl{
 			uint64_type protected_;
 			uint64_type next_address_;
 
-			block_list_type *blocks_;
-			tls_list_type tls_captures_;
+			block_list_type blocks_;
+			tls_thunk_ptr_list_type tls_captures_;
 
 			available_list_type available_list_;
 			dependency_list_type dependencies_;
@@ -335,7 +338,7 @@ namespace oosl{
 			lock_type lock_;
 			random_engine_type random_engine_;
 
-			static thread_local block_list_type tls_blocks_;
+			static thread_local block_ptr_list_type tls_blocks_;
 			static thread_local bool is_protected_;
 		};
 

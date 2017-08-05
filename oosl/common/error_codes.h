@@ -12,6 +12,7 @@ namespace oosl{
 			read_violation,
 			write_violation,
 			invalid_memory_size,
+			tls_error,
 		};
 	}
 }
