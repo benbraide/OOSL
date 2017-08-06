@@ -218,6 +218,8 @@ namespace oosl{
 						break;
 					}
 				}
+
+				call_watchers_(watcher_range_type{ address, address + entry->actual_size - 1 });
 			}
 
 			void read(uint64_type address, char *buffer, size_type size);
@@ -313,7 +315,9 @@ namespace oosl{
 
 			template <typename target_type, typename value_type>
 			target_type read_numeric_(const char *source){
-				return static_cast<target_type>(*reinterpret_cast<const value_type *>(source));
+				auto value = value_type();
+				str_cpy_(reinterpret_cast<char *>(&value), source, sizeof(value_type));
+				return static_cast<target_type>(value);
 			}
 
 			void add_available_(uint64_type value, size_type size);

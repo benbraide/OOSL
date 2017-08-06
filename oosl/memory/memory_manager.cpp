@@ -1,12 +1,18 @@
 #include "memory_manager.h"
 
-#pragma warning(disable: 4996)
-
 oosl::memory::manager::manager(uint64_type protected_range)
 	: protected_(protected_range), next_address_(protected_range + 1), states_(state_type::nil){}
 
 oosl::memory::manager::~manager(){
-	tear();
+	lock_once_type guard(lock_);
+	if (!is_torn()){
+		if (!blocks_.empty()){
+			for (auto &entry : blocks_){//Free all allocated memory
+				if (entry.second.ptr != nullptr)
+					delete[] entry.second.ptr;
+			}
+		}
+	}
 }
 
 void oosl::memory::manager::tear(){
@@ -228,8 +234,9 @@ oosl::memory::block *oosl::memory::manager::reallocate(uint64_type address, size
 
 	if (entry->size < size){//Expand
 		if (entry->actual_size < size){//Reallocate
-			auto ptr = entry->ptr;
+			auto old_ptr = entry->ptr;
 			auto attributes = entry->attributes;
+			auto old_size = entry->size;
 
 			entry->ptr = nullptr;//Preserve memory
 			deallocate(address);
@@ -237,9 +244,9 @@ oosl::memory::block *oosl::memory::manager::reallocate(uint64_type address, size
 			entry = allocate(size);
 			entry->attributes = attributes;//Restore attributes
 
-			if (ptr != nullptr){//Duplicate and free memory
-				std::strncpy(entry->ptr, ptr, size);
-				delete[] ptr;
+			if (old_ptr != nullptr){//Duplicate and free memory
+				memcpy_s(entry->ptr, entry->actual_size, old_ptr, old_size);
+				delete[] old_ptr;
 			}
 		}
 		else//Expand size
@@ -293,7 +300,7 @@ void oosl::memory::manager::read(uint64_type address, char *buffer, size_type si
 			throw common::error_codes::read_violation;
 
 		min_size = (available_size < size) ? available_size : size;
-		std::strncpy(buffer, entry->ptr, min_size);//Read block
+		memcpy_s(buffer, size, entry->ptr, min_size);//Read block
 
 		buffer += min_size;
 		address += min_size;
@@ -384,7 +391,7 @@ void oosl::memory::manager::write_(uint64_type address, const char *source, size
 		pre_write_(*entry);
 		min_size = (available_size < size) ? available_size : size;
 		if (is_array)
-			std::strncpy(entry->ptr + ptr_index, source, min_size);
+			memcpy_s(entry->ptr + ptr_index, size, source, min_size);
 		else//Set applicable
 			std::memset(entry->ptr + ptr_index, *source, min_size);
 
@@ -462,7 +469,7 @@ void oosl::memory::manager::call_watchers_(const watcher_range_type &range){
 }
 
 void oosl::memory::manager::str_cpy_(char *destination, const char *source, size_type count){
-	std::strncpy(destination, source, count);
+	memcpy_s(destination, count, source, count);
 }
 
 thread_local oosl::memory::manager::block_ptr_list_type oosl::memory::manager::tls_blocks_;
