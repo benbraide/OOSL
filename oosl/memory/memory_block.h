@@ -17,12 +17,13 @@ namespace oosl{
 				nil					= (0 << 0x0000),
 				not_allocated		= (1 << 0x0000),
 				immutable			= (1 << 0x0001),
-				tls					= (1 << 0x0002),
-				indirect			= (1 << 0x0003),
-				numeric				= (1 << 0x0004),
-				floating_point		= (1 << 0x0005),
-				unsigned_integer	= (1 << 0x0006),
-				long_double			= (1 << 0x0007),
+				atomic				= (1 << 0x0002),
+				tls					= (1 << 0x0003),
+				indirect			= (1 << 0x0004),
+				numeric				= (1 << 0x0005),
+				floating_point		= (1 << 0x0006),
+				unsigned_integer	= (1 << 0x0007),
+				long_double			= (1 << 0x0008),
 			};
 
 			size_type ref_count;

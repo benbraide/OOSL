@@ -50,6 +50,9 @@ namespace oosl{
 			typedef std::shared_mutex lock_type;
 			typedef common::lock_once<lock_type> lock_once_type;
 
+			typedef std::mutex atomic_lock_type;
+			typedef common::lock_once<atomic_lock_type> atomic_lock_once_type;
+
 			typedef decltype(&lock_type::lock_shared) shared_locker_type;
 
 			typedef common::error_codes error_codes_type;
@@ -122,14 +125,14 @@ namespace oosl{
 				auto entry = allocate(sizeof(value_type));
 
 				OOSL_SET(entry->attributes, attribute_type::immutable);
-				if (std::is_arithmetic<target_type>::value){
+				if (std::is_arithmetic<value_type>::value){
 					OOSL_SET(entry->attributes, attribute_type::numeric);
-					if (std::is_floating_point<target_type>::value){
+					if (std::is_floating_point<value_type>::value){
 						OOSL_SET(entry->attributes, attribute_type::floating_point);
-						if (std::is_same<target_type, long double>::value)
+						if (std::is_same<value_type, long double>::value)
 							OOSL_SET(entry->attributes, attribute_type::long_double);
 					}
-					else if (std::is_unsigned<target_type>::value)
+					else if (std::is_unsigned<value_type>::value)
 						OOSL_SET(entry->attributes, attribute_type::unsigned_integer);
 				}
 
@@ -147,6 +150,8 @@ namespace oosl{
 			block *allocate_scalar(const wchar_t *value, size_type count = 0u);
 
 			block *reallocate(uint64_type address, size_type size);
+
+			block *atomic(uint64_type address);
 
 			void fill(uint64_type address, char source, size_type count);
 
@@ -339,8 +344,10 @@ namespace oosl{
 			watcher_list_type watchers_;
 
 			state_type states_;
-			lock_type lock_;
 			random_engine_type random_engine_;
+
+			lock_type lock_;
+			atomic_lock_type atomic_lock_;
 
 			static thread_local block_ptr_list_type tls_blocks_;
 			static thread_local bool is_protected_;

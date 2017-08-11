@@ -258,6 +258,16 @@ oosl::memory::block *oosl::memory::manager::reallocate(uint64_type address, size
 	return entry;
 }
 
+oosl::memory::block *oosl::memory::manager::atomic(uint64_type address){
+	lock_once_type guard(lock_);
+
+	auto entry = allocate_scalar(address);
+	if (entry != nullptr)//Set atomic attribute
+		OOSL_SET(entry->attributes, attribute_type::atomic);
+
+	return entry;
+}
+
 void oosl::memory::manager::fill(uint64_type address, char source, size_type count){
 	write_(address, &source, count, false);
 }
@@ -381,7 +391,17 @@ void oosl::memory::manager::write_(uint64_type address, const char *source, size
 	watcher *watcher = nullptr;
 
 	while (size > 0u){
-		if ((entry = (entry == nullptr) ? find_enclosing_block(address) : find_block(address)) != nullptr){//Get next block
+		if (entry == nullptr){//First block
+			if ((entry = find_enclosing_block(address)) != nullptr && entry->address == address && OOSL_IS(entry->attributes, attribute_type::atomic)){//Atomic write
+				atomic_lock_once_type guard(atomic_lock_);//Acquire atomic lock
+				write_(read_numeric_<uint64_type, uint64_type>(entry->ptr), source, size, is_array);
+				return;
+			}
+		}
+		else//Continue with next block
+			entry = find_block(address);
+
+		if (entry != nullptr){//Valid block
 			ptr_index = static_cast<size_type>(address - entry->address);
 			available_size = (entry->actual_size - ptr_index);
 		}

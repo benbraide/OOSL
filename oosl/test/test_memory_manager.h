@@ -46,6 +46,9 @@ DOCTEST_TEST_CASE("memory manager test"){
 		auto reserved_address = manager.reserve(32u);
 		DOCTEST_REQUIRE(reserved_address > fourth_allocation->address);
 
+		auto constant_allocation = manager.allocate_scalar("oosl");
+		DOCTEST_REQUIRE(constant_allocation != nullptr);
+
 		auto fifth_allocation = manager.allocate(32u, reserved_address);
 		DOCTEST_REQUIRE(fifth_allocation != nullptr);
 
@@ -77,6 +80,11 @@ DOCTEST_TEST_CASE("memory manager test"){
 			DOCTEST_CHECK(fifth_allocation->size == 32u);
 			DOCTEST_CHECK(fifth_allocation->size == fifth_allocation->actual_size);
 			DOCTEST_CHECK(fifth_allocation->attributes == oosl::memory::manager::attribute_type::nil);
+
+			DOCTEST_CHECK(constant_allocation->address > fifth_allocation->address);
+			DOCTEST_CHECK(constant_allocation->size == 5u);
+			DOCTEST_CHECK(constant_allocation->size == constant_allocation->actual_size);
+			DOCTEST_CHECK(constant_allocation->attributes != oosl::memory::manager::attribute_type::nil);
 		}
 
 		DOCTEST_SUBCASE("deallocation test"){
@@ -146,6 +154,8 @@ DOCTEST_TEST_CASE("memory manager test"){
 			manager.write_numeric(fourth_allocation->address, 4.5f);
 			DOCTEST_CHECK(manager.read<float>(fourth_allocation->address) == doctest::Approx(4.5f));
 			DOCTEST_CHECK(manager.read_numeric<float>(fourth_allocation->address) == doctest::Approx(4.5f));
+
+			DOCTEST_CHECK_THROWS(manager.write(constant_allocation->address, "pptm", 5u));
 		}
 
 		DOCTEST_SUBCASE("search test"){
