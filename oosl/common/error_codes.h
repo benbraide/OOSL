@@ -13,6 +13,12 @@ namespace oosl{
 			write_violation,
 			invalid_memory_size,
 			tls_error,
+			uninitialized_object,
+			void_object,
+			incompatible_types,
+			rval_to_lval,
+			rval_to_lval_assignment,
+			not_implemented,
 		};
 	}
 }

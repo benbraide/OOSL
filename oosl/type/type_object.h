@@ -7,6 +7,9 @@
 #include <memory>
 
 #include "../common/preprocessor.h"
+#include "../common/error_codes.h"
+#include "../common/controller.h"
+
 #include "type_id.h"
 
 #define OOSL_MIN_TYPE_SCORE 0
@@ -14,7 +17,7 @@
 
 namespace oosl{
 	namespace storage{
-		class entry;
+		struct entry;
 	}
 
 	namespace driver{
@@ -26,11 +29,15 @@ namespace oosl{
 		public:
 			typedef id id_type;
 
+			typedef common::error_codes error_type;
+			typedef common::controller controller_type;
+
 			typedef storage::entry storage_entry_type;
 			typedef driver::object driver_type;
 
 			typedef std::size_t size_type;
 			typedef unsigned __int64 uint64_type;
+
 			typedef std::shared_ptr<object> ptr_type;
 
 			enum class attribute : unsigned int{
@@ -78,11 +85,11 @@ namespace oosl{
 
 			virtual id_type id();
 
+			virtual bool is(id_type id);
+
 			virtual bool is(attribute attributes);
 
 			virtual bool is_any(attribute attributes);
-
-			virtual bool is(id_type id);
 
 			virtual bool is_same(object &type);
 
