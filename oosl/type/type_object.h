@@ -67,7 +67,7 @@ namespace oosl{
 
 			virtual object *non_variadic();
 
-			virtual std::string &name();
+			virtual std::string name();
 
 			virtual std::string print();
 

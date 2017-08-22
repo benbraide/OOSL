@@ -20,7 +20,7 @@ oosl::type::object *oosl::type::object::non_variadic(){
 	throw error_type::not_implemented;
 }
 
-std::string &oosl::type::object::name(){
+std::string oosl::type::object::name(){
 	throw error_type::not_implemented;
 }
 
@@ -33,7 +33,13 @@ oosl::type::object::size_type oosl::type::object::size(){
 }
 
 int oosl::type::object::score(object &type){
-	return (&type == this) ? OOSL_MAX_TYPE_SCORE : OOSL_MIN_TYPE_SCORE;
+	if (&type == this)//Exact types
+		return OOSL_MAX_TYPE_SCORE;
+
+	if (is_primitive() && type.is_primitive() && id() == type.id())
+		return OOSL_MAX_TYPE_SCORE;//Exact IDs
+
+	return (type.is_any() ? (OOSL_MAX_TYPE_SCORE - 1) : OOSL_MIN_TYPE_SCORE);
 }
 
 int oosl::type::object::score(storage_entry_type &entry){
@@ -241,7 +247,7 @@ bool oosl::type::object::is_floating_point(){
 }
 
 bool oosl::type::object::is_pointer(){
-	return is(id_type::pointer_);
+	return (is(id_type::pointer_) || is(id_type::nullptr_));
 }
 
 bool oosl::type::object::is_strong_pointer(){
