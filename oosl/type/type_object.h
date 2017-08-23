@@ -5,6 +5,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "../common/preprocessor.h"
 #include "../common/error_codes.h"
@@ -39,6 +40,8 @@ namespace oosl{
 			typedef unsigned __int64 uint64_type;
 
 			typedef std::shared_ptr<object> ptr_type;
+			typedef std::vector<ptr_type> ptr_list_type;
+			typedef std::vector<storage_entry_type *> storage_entry_list_type;
 
 			enum class attribute : unsigned int{
 				nil				= (0 << 0x0000),
@@ -67,6 +70,10 @@ namespace oosl{
 
 			virtual object *non_variadic();
 
+			virtual object &function_return_type();
+
+			virtual ptr_list_type &function_parameters();
+
 			virtual std::string name();
 
 			virtual std::string print();
@@ -76,6 +83,8 @@ namespace oosl{
 			virtual int score(object &type);
 
 			virtual int score(storage_entry_type &entry);
+
+			virtual int score(const storage_entry_list_type &entries);
 
 			virtual object *match(object &type, match_type criteria = match_type::same);
 
@@ -154,8 +163,6 @@ namespace oosl{
 			virtual bool is_ref();
 
 			virtual bool is_rval_ref();
-
-			virtual bool is_specific();
 
 			virtual bool is_static();
 

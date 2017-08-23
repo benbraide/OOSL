@@ -20,6 +20,14 @@ oosl::type::object *oosl::type::object::non_variadic(){
 	throw error_type::not_implemented;
 }
 
+oosl::type::object &oosl::type::object::function_return_type(){
+	throw error_type::not_implemented;
+}
+
+oosl::type::object::ptr_list_type &oosl::type::object::function_parameters(){
+	throw error_type::not_implemented;
+}
+
 std::string oosl::type::object::name(){
 	throw error_type::not_implemented;
 }
@@ -44,6 +52,10 @@ int oosl::type::object::score(object &type){
 
 int oosl::type::object::score(storage_entry_type &entry){
 	return score(*controller_type::active->driver(entry).type(entry)->non_modified());
+}
+
+int oosl::type::object::score(const storage_entry_list_type &entries){
+	throw error_type::not_implemented;
 }
 
 oosl::type::object *oosl::type::object::match(object &type, match_type criteria){
@@ -291,15 +303,11 @@ bool oosl::type::object::is_nan(){
 }
 
 bool oosl::type::object::is_ref(){
-	return false;
+	return is(attribute::ref);
 }
 
 bool oosl::type::object::is_rval_ref(){
-	return false;
-}
-
-bool oosl::type::object::is_specific(){
-	return false;
+	return is(attribute::ref | attribute::rval);
 }
 
 bool oosl::type::object::is_static(){
