@@ -97,6 +97,6 @@ bool oosl::driver::object::is_void(entry_type &entry){
 	return OOSL_IS(attributes(entry), attribute_type::void_);
 }
 
-oosl::driver::object::uint64_type oosl::driver::object::value(entry_type &entry){
+void oosl::driver::object::value(entry_type &entry, type_id_type to, char *destination){
 	throw error_type::not_implemented;
 }

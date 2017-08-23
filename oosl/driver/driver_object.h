@@ -3,6 +3,7 @@
 #ifndef OOSL_DRIVER_OBJECT_H
 #define OOSL_DRIVER_OBJECT_H
 
+#include "../type/type_mapper.h"
 #include "../storage/storage_entry.h"
 
 namespace oosl{
@@ -10,6 +11,7 @@ namespace oosl{
 		class object{
 		public:
 			typedef oosl::type::object type_object_type;
+			typedef oosl::type::id type_id_type;
 
 			typedef common::error_codes error_type;
 			typedef common::controller controller_type;
@@ -55,11 +57,19 @@ namespace oosl{
 
 			virtual bool is_void(entry_type &entry);
 
-			virtual uint64_type value(entry_type &entry);
+			virtual void value(entry_type &entry, type_id_type to, char *destination);
 
 			template <typename target_type>
-			target_type typed_value(entry_type &entry){
-				return static_cast<target_type>(value(entry));
+			void value(entry_type &entry, target_type &val){
+				value(entry, type::mapper<target_type>::id, reinterpret_cast<char *>(&val));
+				return val;
+			}
+
+			template <typename target_type>
+			target_type value(entry_type &entry){
+				target_type val;
+				value(entry, val);
+				return val;
 			}
 		};
 
