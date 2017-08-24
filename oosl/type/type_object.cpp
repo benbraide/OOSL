@@ -51,7 +51,7 @@ int oosl::type::object::score(object &type){
 }
 
 int oosl::type::object::score(storage_entry_type &entry){
-	return score(*controller_type::active->driver(entry).type(entry)->non_modified());
+	return score(*entry.type->driver()->type(entry)->non_modified());
 }
 
 int oosl::type::object::score(const storage_entry_list_type &entries){
