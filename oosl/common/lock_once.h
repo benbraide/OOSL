@@ -17,19 +17,26 @@ namespace oosl{
 			typedef lock_type lock_type;
 
 			explicit lock_once(lock_type &lock)
+				: lock_once(&lock){}
+
+			explicit lock_once(lock_type *lock)
 				: lock_(nullptr){
-				if (!lock_once_info::lock_is_acquired){
+				if (lock != nullptr && !lock_once_info::lock_is_acquired){
 					lock_once_info::lock_is_acquired = true;
-					(lock_ = &lock)->lock();
+					(lock_ = lock)->lock();
 				}
 			}
 
 			template <typename function_type, typename... args_types>
 			lock_once(lock_type &lock, function_type locker, args_types &&... args)
+				: lock_once(&lock, locker, std::forward<args_types>(args)...){}
+
+			template <typename function_type, typename... args_types>
+			lock_once(lock_type *lock, function_type locker, args_types &&... args)
 				: lock_(nullptr){
-				if (!lock_once_info::lock_is_acquired){
+				if (lock != nullptr && !lock_once_info::lock_is_acquired){
 					lock_once_info::lock_is_acquired = true;
-					((lock_ = &lock)->*locker)(std::forward<args_types>(args)...);
+					((lock_ = lock)->*locker)(std::forward<args_types>(args)...);
 				}
 			}
 

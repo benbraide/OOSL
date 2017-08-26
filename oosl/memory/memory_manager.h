@@ -294,6 +294,8 @@ namespace oosl{
 
 			bool is_protected(uint64_type address) const;
 
+			lock_type &lock();
+
 			static const shared_locker_type shared_locker;
 
 		private:

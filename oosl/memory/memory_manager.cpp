@@ -371,6 +371,10 @@ bool oosl::memory::manager::is_protected(uint64_type address) const{
 	return (address <= protected_);
 }
 
+oosl::memory::manager::lock_type &oosl::memory::manager::lock(){
+	return lock_;
+}
+
 const oosl::memory::manager::shared_locker_type oosl::memory::manager::shared_locker = &lock_type::lock_shared;
 
 void oosl::memory::manager::pre_write_(block &memory_block){
