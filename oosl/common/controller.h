@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <memory>
+#include <functional>
 #include <unordered_map>
 
 #include "../type/type_id.h"
@@ -31,6 +32,8 @@ namespace oosl{
 
 	namespace common{
 		struct interpreter_info;
+
+		struct runtime_block_info;
 		struct runtime_info;
 
 		class error;
@@ -56,6 +59,8 @@ namespace oosl{
 
 			typedef std::shared_ptr<type_object_type> type_object_ptr_type;
 			typedef std::unordered_map<type_id_type, type_object_ptr_type> type_map_type;
+
+			typedef std::function<void()> callback_type;
 
 			enum class static_value_type{
 				nil,
@@ -88,6 +93,10 @@ namespace oosl{
 			virtual interpreter_info_type &interpreter_info() = 0;
 
 			virtual runtime_info_type &runtime_info() = 0;
+
+			virtual void on_exception(callback_type callback) = 0;
+
+			virtual void on_exception_pop() = 0;
 
 			virtual error_type &error() = 0;
 

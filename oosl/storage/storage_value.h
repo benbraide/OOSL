@@ -17,6 +17,7 @@ namespace oosl{
 
 		class value{
 		public:
+			typedef unsigned __int64 uint64_type;
 			typedef oosl::type::object type_object_type;
 
 			typedef oosl::storage::entry entry_type;
@@ -25,7 +26,7 @@ namespace oosl{
 			typedef std::shared_ptr<type_object_type> type_ptr_type;
 			typedef std::shared_ptr<object_type> object_ptr_type;
 
-			typedef std::variant<entry_type, type_ptr_type, object_ptr_type> variant_type;
+			typedef std::variant<entry_type, type_ptr_type, object_ptr_type, uint64_type> variant_type;
 
 			template <typename arg_type>
 			explicit value(const arg_type &arg)
@@ -37,11 +38,15 @@ namespace oosl{
 
 			object_type *storage();
 
+			uint64_type unknown();
+
 			bool is_object() const;
 
 			bool is_type() const;
 
 			bool is_storage() const;
+
+			bool is_unknown() const;
 
 		protected:
 			variant_type value_;
