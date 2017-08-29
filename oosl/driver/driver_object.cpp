@@ -73,6 +73,22 @@ oosl::driver::object::attribute_type oosl::driver::object::attributes(entry_type
 	return attributes;
 }
 
+oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &entry, unary_operator_info_type &operator_info){
+	return nullptr;//#TODO: Implement
+}
+
+oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+	return nullptr;//#TODO: Implement
+}
+
+oosl::driver::object::entry_type *oosl::driver::object::assign(entry_type &entry, entry_type &value){
+	return nullptr;//#TODO: Implement
+}
+
+void oosl::driver::object::initialize(entry_type &entry){
+	//#TODO: Implement
+}
+
 bool oosl::driver::object::is_lval(entry_type &entry){
 	return OOSL_IS(attributes(entry), attribute_type::lval);
 }
