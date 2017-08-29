@@ -22,6 +22,7 @@ namespace oosl{
 				nan_				= (1 << 0x0004),
 				static_				= (1 << 0x0005),
 				void_				= (1 << 0x0006),
+				no_free				= (1 << 0x0007),
 			};
 
 			object *scope;
