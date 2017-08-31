@@ -100,19 +100,7 @@ namespace oosl{
 
 			template <typename target_type>
 			block *allocate(uint64_type address = 0ull){
-				auto entry = allocate(sizeof(target_type), address);
-				if (std::is_arithmetic<target_type>::value){
-					OOSL_SET(entry->attributes, attribute_type::numeric);
-					if (std::is_floating_point<target_type>::value){
-						OOSL_SET(entry->attributes, attribute_type::floating_point);
-						if (std::is_same<target_type, long double>::value)
-							OOSL_SET(entry->attributes, attribute_type::long_double);
-					}
-					else if (std::is_unsigned<target_type>::value)
-						OOSL_SET(entry->attributes, attribute_type::unsigned_integer);
-				}
-				
-				return entry;
+				return allocate(sizeof(target_type), address);
 			}
 
 			block *allocate(size_type size, uint64_type address = 0ull);
@@ -125,18 +113,8 @@ namespace oosl{
 				auto entry = allocate(sizeof(value_type));
 
 				OOSL_SET(entry->attributes, attribute_type::immutable);
-				if (std::is_arithmetic<value_type>::value){
-					OOSL_SET(entry->attributes, attribute_type::numeric);
-					if (std::is_floating_point<value_type>::value){
-						OOSL_SET(entry->attributes, attribute_type::floating_point);
-						if (std::is_same<value_type, long double>::value)
-							OOSL_SET(entry->attributes, attribute_type::long_double);
-					}
-					else if (std::is_unsigned<value_type>::value)
-						OOSL_SET(entry->attributes, attribute_type::unsigned_integer);
-				}
-
 				str_cpy_(entry->ptr, reinterpret_cast<const char *>(&value), entry->size);
+
 				return entry;
 			}
 
@@ -150,8 +128,6 @@ namespace oosl{
 			block *allocate_scalar(const wchar_t *value, size_type count = 0u);
 
 			block *reallocate(uint64_type address, size_type size);
-
-			block *atomic(uint64_type address);
 
 			void fill(uint64_type address, char source, size_type count);
 
@@ -167,66 +143,6 @@ namespace oosl{
 				write_(address, (const char *)source, count * sizeof(value_type), true);
 			}
 
-			template <typename value_type>
-			void write_numeric(uint64_type address, value_type value){
-				lock_once_type guard(lock_, shared_locker);
-
-				auto entry = find_block(address);
-				if (entry == nullptr)//Invalid address
-					throw error_codes_type::invalid_address;
-
-				pre_write_(*entry);
-				if (OOSL_IS(entry->attributes, attribute_type::floating_point)){
-					switch (entry->size){
-					case OOSL_MM_FLT_SIZE://float
-						write_numeric_<float>(entry->ptr, value);
-						break;
-					case OOSL_MM_DBL_SIZE://double | long doub;e
-						if (OOSL_IS(entry->attributes, attribute_type::long_double))
-							write_numeric_<long double>(entry->ptr, value);
-						else
-							write_numeric_<double>(entry->ptr, value);
-						break;
-					default://Error
-						throw error_codes_type::invalid_memory_size;
-						break;
-					}
-				}
-				else{//Integral
-					switch (entry->size){
-					case OOSL_MM_INT8_SIZE://8-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							write_numeric_<unsigned __int8>(entry->ptr, value);
-						else//Signed
-							write_numeric_<__int8>(entry->ptr, value);
-						break;
-					case OOSL_MM_INT16_SIZE://16-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							write_numeric_<unsigned __int16>(entry->ptr, value);
-						else//Signed
-							write_numeric_<__int16>(entry->ptr, value);
-						break;
-					case OOSL_MM_INT32_SIZE://32-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							write_numeric_<unsigned __int32>(entry->ptr, value);
-						else//Signed
-							write_numeric_<__int32>(entry->ptr, value);
-						break;
-					case OOSL_MM_INT64_SIZE://64-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							write_numeric_<unsigned __int64>(entry->ptr, value);
-						else//Signed
-							write_numeric_<__int64>(entry->ptr, value);
-						break;
-					default://Error
-						throw error_codes_type::invalid_memory_size;
-						break;
-					}
-				}
-
-				call_watchers_(watcher_range_type{ address, address + entry->actual_size - 1 });
-			}
-
 			void read(uint64_type address, char *buffer, size_type size);
 
 			template <typename target_type>
@@ -236,50 +152,9 @@ namespace oosl{
 				return value;
 			}
 
-			template <typename target_type>
+			template <typename target_type, typename source_type>
 			target_type read_numeric(uint64_type address){
-				lock_once_type guard(lock_, shared_locker);
-
-				auto entry = find_block(address);
-				if (entry == nullptr)//Invalid address
-					throw error_codes_type::invalid_address;
-
-				if (OOSL_IS(entry->attributes, attribute_type::floating_point)){
-					switch (entry->size){
-					case OOSL_MM_FLT_SIZE://float
-						return read_numeric_<target_type, float>(entry->ptr);
-					case OOSL_MM_DBL_SIZE://double | long doub;e
-						if (OOSL_IS(entry->attributes, attribute_type::long_double))
-							return read_numeric_<target_type, long double>(entry->ptr);
-						return read_numeric_<target_type, double>(entry->ptr);
-					default://Error
-						break;
-					}
-				}
-				else{//Integral
-					switch (entry->size){
-					case OOSL_MM_INT8_SIZE://8-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							return read_numeric_<target_type, unsigned __int8>(entry->ptr);
-						return read_numeric_<target_type, __int8>(entry->ptr);
-					case OOSL_MM_INT16_SIZE://16-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							return read_numeric_<target_type, unsigned __int16>(entry->ptr);
-						return read_numeric_<target_type, __int16>(entry->ptr);
-					case OOSL_MM_INT32_SIZE://32-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							return read_numeric_<target_type, unsigned __int32>(entry->ptr);
-						return read_numeric_<target_type, __int32>(entry->ptr);
-					case OOSL_MM_INT64_SIZE://64-bit integer
-						if (OOSL_IS(entry->attributes, attribute_type::unsigned_integer))
-							return read_numeric_<target_type, unsigned __int64>(entry->ptr);
-						return read_numeric_<target_type, __int64>(entry->ptr);
-					default://Error
-						break;
-					}
-				}
-
-				throw error_codes_type::invalid_memory_size;
+				return static_cast<target_type>(read<source_type>(address));
 			}
 
 			block *find_block(uint64_type address);

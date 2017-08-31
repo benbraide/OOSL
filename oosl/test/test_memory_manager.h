@@ -148,12 +148,12 @@ DOCTEST_TEST_CASE("memory manager test"){
 
 			DOCTEST_CHECK(read_value == 72ll);
 			DOCTEST_CHECK(manager.read<long long>(first_allocation->address) == 72ll);
-			DOCTEST_CHECK(manager.read_numeric<int>(first_allocation->address) == 72);
-			DOCTEST_CHECK(manager.read_numeric<float>(first_allocation->address) == 72.0f);
+			DOCTEST_CHECK(manager.read_numeric<int, unsigned long long>(first_allocation->address) == 72);
+			DOCTEST_CHECK(manager.read_numeric<float, unsigned long long>(first_allocation->address) == 72.0f);
 
-			manager.write_numeric(fourth_allocation->address, 4.5f);
+			manager.write(fourth_allocation->address, 4.5f);
 			DOCTEST_CHECK(manager.read<float>(fourth_allocation->address) == doctest::Approx(4.5f));
-			DOCTEST_CHECK(manager.read_numeric<float>(fourth_allocation->address) == doctest::Approx(4.5f));
+			DOCTEST_CHECK(manager.read_numeric<float, float>(fourth_allocation->address) == doctest::Approx(4.5f));
 
 			DOCTEST_CHECK_THROWS(manager.write(constant_allocation->address, "pptm", 5u));
 		}
