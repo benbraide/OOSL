@@ -16,8 +16,11 @@ namespace oosl{
 			uninitialized_object,
 			void_object,
 			incompatible_types,
+			rval_ref,
 			rval_to_lval,
-			rval_to_lval_assignment,
+			rval_assignment,
+			integer_required,
+			unhandled_operator,
 			not_implemented,
 		};
 	}

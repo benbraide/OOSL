@@ -9,6 +9,24 @@ namespace oosl{
 		public:
 			virtual ~dependency() = default;
 		};
+
+		template <class value_type>
+		class value_dependency : public dependency{
+		public:
+			typedef value_type value_type;
+
+			explicit value_dependency(const value_type &value)
+				: value_(value){}
+
+			virtual ~value_dependency() = default;
+
+			value_type &value(){
+				return value_;
+			}
+
+		protected:
+			value_type value_;
+		};
 	}
 }
 

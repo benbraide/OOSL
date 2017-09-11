@@ -18,6 +18,7 @@ namespace oosl{
 			typedef oosl::storage::entry entry_type;
 			typedef entry_type::attribute_type entry_attribute_type;
 
+			typedef oosl::type::object::ptr_type type_ptr_type;
 			typedef std::list<entry_type> entry_list_type;
 
 			virtual ~temporary();
@@ -32,13 +33,16 @@ namespace oosl{
 			}
 
 			template <typename value_type>
-			entry_type *add_scalar(value_type value){
+			entry_type *add_scalar(value_type value, type_ptr_type type = nullptr){
 				auto block = common::controller::active->memory().allocate_scalar(value);
+				if (type == nullptr)//Find type
+					type = common::controller::active->find_type(oosl::type::mapper<value_type>::id);
+
 				return &*entry_list_.emplace(entry_list_.end(), entry_type{
 					nullptr,
 					block->address,
 					entry_attribute_type::nil,
-					common::controller::active->find_type(oosl::type::mapper<value_type>::id)
+					type
 				});
 			}
 

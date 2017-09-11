@@ -3,6 +3,8 @@
 #ifndef OOSL_TYPE_MAPPER_H
 #define OOSL_TYPE_MAPPER_H
 
+#include <string>
+
 #include "custom_types.h"
 #include "type_object.h"
 
@@ -102,7 +104,17 @@ namespace oosl{
 		};
 
 		template <>
+		struct mapper<std::string>{
+			static const type::id id = type::id::string_;
+		};
+
+		template <>
 		struct mapper<wstring_type>{
+			static const type::id id = type::id::wstring_;
+		};
+
+		template <>
+		struct mapper<std::wstring>{
 			static const type::id id = type::id::wstring_;
 		};
 	}

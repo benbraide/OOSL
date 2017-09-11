@@ -4,8 +4,10 @@
 #define OOSL_DRIVER_OBJECT_H
 
 #include "../type/type_mapper.h"
+#include "../type/custom_types.h"
+#include "../type/pointer_type.h"
 #include "../common/operator_info.h"
-#include "../storage/storage_entry.h"
+#include "../storage/temporary_storage.h"
 
 namespace oosl{
 	namespace driver{
@@ -13,6 +15,11 @@ namespace oosl{
 		public:
 			typedef oosl::type::object type_object_type;
 			typedef oosl::type::id type_id_type;
+			typedef oosl::type::bool_type bool_type;
+
+			typedef type_object_type::ptr_type type_ptr_type;
+			typedef oosl::memory::value_dependency<type_ptr_type> type_value_dependency_type;
+			typedef oosl::memory::block::attribute_type memory_attribute_type;
 
 			typedef common::error_codes error_type;
 			typedef common::controller controller_type;
@@ -75,7 +82,6 @@ namespace oosl{
 			template <typename target_type>
 			void value(entry_type &entry, target_type &val){
 				value(entry, type::mapper<target_type>::id, reinterpret_cast<char *>(&val));
-				return val;
 			}
 
 			template <typename target_type>
@@ -84,6 +90,13 @@ namespace oosl{
 				value(entry, val);
 				return val;
 			}
+
+		protected:
+			virtual entry_type *evaluate_(entry_type &entry, unary_operator_info_type &operator_info);
+
+			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand);
+
+			virtual entry_type *assign_(entry_type &entry, entry_type &value);
 		};
 
 		OOSL_MAKE_OPERATORS(object::cast_option_type);
