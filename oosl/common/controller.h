@@ -75,6 +75,7 @@ namespace oosl{
 				nil,
 				boolean,
 				byte,
+				char_,
 				numeric,
 				array_,
 				pointer,

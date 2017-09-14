@@ -23,6 +23,7 @@ namespace oosl{
 
 			typedef common::error_codes error_type;
 			typedef common::controller controller_type;
+			typedef controller_type::static_value_type static_value_type;
 
 			typedef common::operator_id operator_id_type;
 			typedef common::unary_operator_info unary_operator_info_type;
@@ -97,6 +98,50 @@ namespace oosl{
 			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand);
 
 			virtual entry_type *assign_(entry_type &entry, entry_type &value);
+
+			template <typename target_type>
+			entry_type *evaluate_boolean_(entry_type &entry, operator_id_type operator_id, entry_type &operand){
+				auto right = operand.type->driver()->value<target_type>(operand);
+				switch (operator_id){
+				case operator_id_type::less:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) < right) ? bool_type::true_ : bool_type::false_);
+				case operator_id_type::less_or_equal:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) <= right) ? bool_type::true_ : bool_type::false_);
+				case operator_id_type::equality:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) == right) ? bool_type::true_ : bool_type::false_);
+				case operator_id_type::inverse_equality:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) != right) ? bool_type::true_ : bool_type::false_);
+				case operator_id_type::more_or_equal:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) >= right) ? bool_type::true_ : bool_type::false_);
+				case operator_id_type::more:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) > right) ? bool_type::true_ : bool_type::false_);
+				default:
+					break;
+				}
+
+				throw error_type::not_implemented;
+			}
+
+			template <typename string_type>
+			entry_type *concatenate_string_(entry_type &entry, entry_type &operand, type_id_type id){
+				typedef typename string_type::traits_type::char_type char_type;
+				string_type left, right;
+
+				value(entry, id, reinterpret_cast<char *>(&left));
+				operand.type->driver()->value(operand, id, reinterpret_cast<char *>(&right));
+				left += right;
+
+				auto new_entry = oosl::common::controller::active->temporary_storage().add(static_cast<size_type>((left.size() + 1) * sizeof(char_type)));
+				auto block = oosl::common::controller::active->memory().find_block(new_entry->address);
+				if (block == nullptr)//Error
+					throw error_type::out_of_memory;
+
+				memcpy(block->ptr, (char *)left.c_str(), block->size);//Copy bytes
+				new_entry->type = oosl::common::controller::active->find_type(id);
+				OOSL_SET(block->attributes, memory_attribute_type::immutable);
+
+				return new_entry;
+			}
 		};
 
 		OOSL_MAKE_OPERATORS(object::cast_option_type);

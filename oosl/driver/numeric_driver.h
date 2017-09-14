@@ -31,10 +31,6 @@ namespace oosl{
 			template <typename from_type>
 			void value_from_(entry_type &entry, type_id_type to, char *destination){
 				switch (to){
-				case type_id_type::char_:
-					return value_<from_type, char>(entry, to, destination);
-				case type_id_type::wchar_:
-					return value_<from_type, wchar_t>(entry, to, destination);
 				case type_id_type::int8_:
 					return value_<from_type, __int8>(entry, to, destination);
 				case type_id_type::uint8_:
@@ -98,29 +94,19 @@ namespace oosl{
 					return post_evaluate_(entry, value<target_type>(entry) * right, true);
 				case operator_id_type::divide:
 					if (right == static_cast<target_type>(0))
-						return nullptr;//#TODO: Return NaN
+						return oosl::common::controller::active->find_static_value(static_value_type::nan_);
 					return post_evaluate_(entry, value<target_type>(entry) / right, false);
 				case operator_id_type::compound_divide:
-					if (right == static_cast<target_type>(0))
-						return nullptr;//#TODO: Return NaN
+					if (right == static_cast<target_type>(0)){//NaN
+						OOSL_SET(entry.attributes, attribute_type::nan_);
+						return &entry;
+					}
 					return post_evaluate_(entry, value<target_type>(entry) / right, true);
-				case operator_id_type::less:
-					return post_evaluate_(entry, (value<target_type>(entry) < right) ? bool_type::true_ : bool_type::false_, false);
-				case operator_id_type::less_or_equal:
-					return post_evaluate_(entry, (value<target_type>(entry) <= right) ? bool_type::true_ : bool_type::false_, false);
-				case operator_id_type::equality:
-					return post_evaluate_(entry, (value<target_type>(entry) == right) ? bool_type::true_ : bool_type::false_, false);
-				case operator_id_type::inverse_equality:
-					return post_evaluate_(entry, (value<target_type>(entry) != right) ? bool_type::true_ : bool_type::false_, false);
-				case operator_id_type::more_or_equal:
-					return post_evaluate_(entry, (value<target_type>(entry) >= right) ? bool_type::true_ : bool_type::false_, false);
-				case operator_id_type::more:
-					return post_evaluate_(entry, (value<target_type>(entry) > right) ? bool_type::true_ : bool_type::false_, false);
 				default:
 					break;
 				}
 
-				throw error_type::not_implemented;
+				return evaluate_boolean_<target_type>(entry, operator_id, operand);
 			}
 
 			template <typename target_type>
@@ -132,11 +118,13 @@ namespace oosl{
 				switch (operator_id){
 				case operator_id_type::modulus:
 					if (right == static_cast<target_type>(0))
-						return nullptr;//#TODO: Return NaN
+						return oosl::common::controller::active->find_static_value(static_value_type::nan_);
 					return post_evaluate_(entry, value<target_type>(entry) % right, false);
 				case operator_id_type::compound_modulus:
-					if (right == static_cast<target_type>(0))
-						return nullptr;//#TODO: Return NaN
+					if (right == static_cast<target_type>(0)){//NaN
+						OOSL_SET(entry.attributes, attribute_type::nan_);
+						return &entry;
+					}
 					return post_evaluate_(entry, value<target_type>(entry) % right, true);
 				case operator_id_type::left_shift:
 					return post_evaluate_(entry, value<target_type>(entry) << right, false);
@@ -248,27 +236,6 @@ namespace oosl{
 			template <typename target_type>
 			std::enable_if_t<!std::is_unsigned_v<target_type>, entry_type *> call_evaluate_(entry_type &entry, operator_id_type operator_id, bool left){
 				return evaluate_signed_<target_type>(entry, operator_id, left);
-			}
-
-			template <typename string_type>
-			entry_type *concatenate_string_(entry_type &entry, entry_type &operand, type_id_type id){
-				typedef typename string_type::traits_type::char_type char_type;
-				string_type left, right;
-
-				value(entry, id, reinterpret_cast<char *>(&left));
-				operand.type->driver()->value(operand, id, reinterpret_cast<char *>(&right));
-				left += right;
-
-				auto new_entry = oosl::common::controller::active->temporary_storage().add(static_cast<size_type>((left.size() + 1) * sizeof(char_type)));
-				auto block = oosl::common::controller::active->memory().find_block(new_entry->address);
-				if (block == nullptr)//Error
-					throw error_type::out_of_memory;
-
-				memcpy(block->ptr, (char *)left.c_str(), block->size);//Copy bytes
-				new_entry->type = oosl::common::controller::active->find_type(id);
-				OOSL_SET(block->attributes, memory_attribute_type::immutable);
-
-				return new_entry;
 			}
 
 			static bool is_(evaluation_option_type left, evaluation_option_type right);

@@ -7,11 +7,22 @@ oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry,
 }
 
 void oosl::driver::numeric::value(entry_type &entry, type_id_type to, char *destination){
-	switch (to){
-	case type_id_type::char_:
-		return value_from_<char>(entry, to, destination);
-	case type_id_type::wchar_:
-		return value_from_<wchar_t>(entry, to, destination);
+	if (OOSL_IS(entry.attributes, attribute_type::nan_)){//NaN
+		switch (to){
+		case type_id_type::string_:
+			*reinterpret_cast<std::string *>(destination) = "NaN";
+			break;
+		case type_id_type::wstring_:
+			*reinterpret_cast<std::wstring *>(destination) = L"NaN";
+			break;
+		default:
+			break;
+		}
+
+		throw error_type::not_implemented;
+	}
+
+	switch (entry.type->id()){
 	case type_id_type::int8_:
 		return value_from_<__int8>(entry, to, destination);
 	case type_id_type::uint8_:
@@ -47,10 +58,6 @@ void oosl::driver::numeric::value(entry_type &entry, type_id_type to, char *dest
 
 oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &entry, unary_operator_info_type &operator_info){
 	switch (entry.type->id()){
-	case type_id_type::char_:
-		return evaluate_integral_<char>(entry, operator_info.id, operator_info.is_left);
-	case type_id_type::wchar_:
-		return evaluate_integral_<wchar_t>(entry, operator_info.id, operator_info.is_left);
 	case type_id_type::int8_:
 		return evaluate_integral_<__int8>(entry, operator_info.id, operator_info.is_left);
 	case type_id_type::uint8_:
@@ -104,10 +111,6 @@ oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &e
 		id = entry.type->id();
 
 	switch (id){
-	case type_id_type::char_:
-		return evaluate_integral_<char>(entry, operator_info.id, operand);
-	case type_id_type::wchar_:
-		return evaluate_integral_<wchar_t>(entry, operator_info.id, operand);
 	case type_id_type::int8_:
 		return evaluate_integral_<__int8>(entry, operator_info.id, operand);
 	case type_id_type::uint8_:

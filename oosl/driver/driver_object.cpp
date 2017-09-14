@@ -85,7 +85,7 @@ oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &ent
 		case operator_id_type::bitwise_and://Return pointer to address
 			if (!OOSL_IS(entry.attributes, attribute_type::lval))
 				throw error_type::rval_ref;
-			return temp_storage.add_scalar(entry.address, std::make_shared<oosl::type::pointer>(type(entry)->non_modified()->reflect()));
+			return temp_storage.add_scalar(entry.address, std::make_shared<oosl::type::pointer>(entry.type->non_modified()->reflect()));
 		case operator_id_type::sizeof_:
 			return temp_storage.add_scalar(size(entry));
 		case operator_id_type::typeof:
