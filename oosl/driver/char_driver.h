@@ -9,16 +9,26 @@ namespace oosl{
 	namespace driver{
 		class char_driver : public object{
 		public:
+			using object::echo;
 			using object::value;
 
 			virtual ~char_driver();
 
 			virtual entry_type *cast(entry_type &entry, type_object_type &type, cast_option_type options = cast_option_type::nil) override;
 
+			virtual void echo(entry_type &entry, output_writer_type &writer) override;
+
 			virtual void value(entry_type &entry, type_id_type to, char *destination) override;
 
 		protected:
 			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
+
+			template <typename target_type>
+			void echo_(entry_type &entry, output_writer_type &writer, type_id_type id){
+				target_type target;
+				value(entry, id, reinterpret_cast<char *>(&target));
+				writer.write(target.c_str());
+			}
 
 			template <typename from_type>
 			void value_from_(entry_type &entry, type_id_type to, char *destination){

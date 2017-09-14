@@ -160,6 +160,14 @@ bool oosl::driver::object::is_void(entry_type &entry){
 	return OOSL_IS(attributes(entry), attribute_type::void_);
 }
 
+void oosl::driver::object::echo(entry_type &entry){
+	echo(entry, common::controller::active->output_writer());
+}
+
+void oosl::driver::object::echo(entry_type &entry, output_writer_type &writer){
+	writer.write(("<Object: " + entry.type->print() + ">").c_str());
+}
+
 void oosl::driver::object::value(entry_type &entry, type_id_type to, char *destination){
 	throw error_type::not_implemented;
 }

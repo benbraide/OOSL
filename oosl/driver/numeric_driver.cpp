@@ -3,7 +3,46 @@
 oosl::driver::numeric::~numeric() = default;
 
 oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry, type_object_type &type, cast_option_type options){
-	return nullptr;
+	if (!OOSL_IS_ANY(options, cast_option_type::reinterpret | cast_option_type::ref) && !type.is_ref()){
+		switch (entry.type->id()){
+		case type_id_type::int8_:
+			return common::controller::active->temporary_storage().add_scalar(value<__int8>(entry));
+		case type_id_type::uint8_:
+			return common::controller::active->temporary_storage().add_scalar(value<unsigned __int8>(entry));
+		case type_id_type::int16_:
+			return common::controller::active->temporary_storage().add_scalar(value<__int16>(entry));
+		case type_id_type::uint16_:
+			return common::controller::active->temporary_storage().add_scalar(value<unsigned __int16>(entry));
+		case type_id_type::int32_:
+			return common::controller::active->temporary_storage().add_scalar(value<__int32>(entry));
+		case type_id_type::uint32_:
+			return common::controller::active->temporary_storage().add_scalar(value<unsigned __int32>(entry));
+		case type_id_type::int64_:
+			return common::controller::active->temporary_storage().add_scalar(value<__int64>(entry));
+		case type_id_type::uint64_:
+			return common::controller::active->temporary_storage().add_scalar(value<unsigned __int64>(entry));
+		/*case type_id_type::int128_:
+			return value_from_<__int128>(entry, to, destination);
+		case type_id_type::uint128_:
+			return value_from_<unsigned __int128>(entry, to, destination);*/
+		case type_id_type::float_:
+			return common::controller::active->temporary_storage().add_scalar(value<float>(entry));
+		case type_id_type::double_:
+			return common::controller::active->temporary_storage().add_scalar(value<double>(entry));
+		case type_id_type::ldouble:
+			return common::controller::active->temporary_storage().add_scalar(value<long double>(entry));
+		default:
+			break;
+		}
+	}
+
+	return object::cast(entry, type, options);
+}
+
+void oosl::driver::numeric::echo(entry_type &entry, output_writer_type &writer){
+	std::string target;
+	value(entry, type_id_type::string_, reinterpret_cast<char *>(&target));
+	writer.write(target.c_str());
 }
 
 void oosl::driver::numeric::value(entry_type &entry, type_id_type to, char *destination){

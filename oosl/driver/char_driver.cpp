@@ -3,7 +3,31 @@
 oosl::driver::char_driver::~char_driver() = default;
 
 oosl::driver::object::entry_type *oosl::driver::char_driver::cast(entry_type &entry, type_object_type &type, cast_option_type options){
-	return nullptr;
+	if (!OOSL_IS_ANY(options, cast_option_type::reinterpret | cast_option_type::ref) && !type.is_ref()){
+		switch (type.id()){
+		case type_id_type::char_:
+			return common::controller::active->temporary_storage().add_scalar(value<char>(entry));
+		case type_id_type::wchar_:
+			return common::controller::active->temporary_storage().add_scalar(value<wchar_t>(entry));
+		default:
+			break;
+		}
+	}
+
+	return object::cast(entry, type, options);
+}
+
+void oosl::driver::char_driver::echo(entry_type &entry, output_writer_type &writer){
+	switch (entry.type->id()){
+	case type_id_type::char_:
+		return echo_<std::string>(entry, writer, type_id_type::string_);
+	case type_id_type::wchar_:
+		return echo_<std::wstring>(entry, writer, type_id_type::wstring_);
+	default:
+		break;
+	}
+
+	throw error_type::not_implemented;
 }
 
 void oosl::driver::char_driver::value(entry_type &entry, type_id_type to, char *destination){

@@ -6,7 +6,10 @@
 #include "../type/type_mapper.h"
 #include "../type/custom_types.h"
 #include "../type/pointer_type.h"
+
 #include "../common/operator_info.h"
+#include "../common/output_writer.h"
+
 #include "../storage/temporary_storage.h"
 
 namespace oosl{
@@ -22,6 +25,8 @@ namespace oosl{
 			typedef oosl::memory::block::attribute_type memory_attribute_type;
 
 			typedef common::error_codes error_type;
+			typedef common::output_writer output_writer_type;
+
 			typedef common::controller controller_type;
 			typedef controller_type::static_value_type static_value_type;
 
@@ -77,6 +82,10 @@ namespace oosl{
 			virtual bool is_nan(entry_type &entry);
 
 			virtual bool is_void(entry_type &entry);
+
+			virtual void echo(entry_type &entry);
+
+			virtual void echo(entry_type &entry, output_writer_type &writer);
 
 			virtual void value(entry_type &entry, type_id_type to, char *destination);
 
@@ -136,7 +145,7 @@ namespace oosl{
 				if (block == nullptr)//Error
 					throw error_type::out_of_memory;
 
-				memcpy(block->ptr, (char *)left.c_str(), block->size);//Copy bytes
+				memcpy(block->ptr, left.c_str(), block->size);//Copy bytes
 				new_entry->type = oosl::common::controller::active->find_type(id);
 				OOSL_SET(block->attributes, memory_attribute_type::immutable);
 

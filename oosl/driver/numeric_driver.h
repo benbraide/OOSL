@@ -9,6 +9,7 @@ namespace oosl{
 	namespace driver{
 		class numeric : public object{
 		public:
+			using object::echo;
 			using object::value;
 
 			enum class evaluation_option_type : unsigned int{
@@ -20,6 +21,8 @@ namespace oosl{
 			virtual ~numeric();
 
 			virtual entry_type *cast(entry_type &entry, type_object_type &type, cast_option_type options = cast_option_type::nil) override;
+
+			virtual void echo(entry_type &entry, output_writer_type &writer) override;
 
 			virtual void value(entry_type &entry, type_id_type to, char *destination) override;
 
