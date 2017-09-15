@@ -116,6 +116,9 @@ oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &ent
 	if (OOSL_IS(entry.attributes, attribute_type::uninitialized) || OOSL_IS(operand.attributes, attribute_type::uninitialized))
 		throw error_type::uninitialized_object;
 
+	if (operator_info.id == operator_id_type::comma)
+		return operand.type->driver()->cast(operand, *type(entry), cast_option_type::ref);
+
 	return evaluate_(entry, operator_info, operand);
 }
 
@@ -177,8 +180,6 @@ oosl::driver::object::entry_type *oosl::driver::object::evaluate_(entry_type &en
 }
 
 oosl::driver::object::entry_type *oosl::driver::object::evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
-	if (operator_info.id == operator_id_type::comma)
-		return operand.type->driver()->cast(operand, *type(entry), cast_option_type::ref);
 	throw error_type::unhandled_operator;
 }
 

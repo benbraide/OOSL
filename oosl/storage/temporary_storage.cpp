@@ -10,3 +10,11 @@ oosl::storage::temporary::~temporary(){
 		entry_list_.clear();
 	}
 }
+
+oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(const std::string &value){
+	return add_string_scalar_(value, common::controller::active->find_type(type::id::string_));
+}
+
+oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(const std::wstring &value){
+	return add_string_scalar_(value, common::controller::active->find_type(type::id::wstring_));
+}

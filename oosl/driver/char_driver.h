@@ -66,7 +66,6 @@ namespace oosl{
 
 			template <typename target_type, typename string_type>
 			entry_type *evaluate_(entry_type &entry, operator_id_type operator_id, entry_type &operand, type_id_type string_id){
-				auto right = operand.type->driver()->value<target_type>(operand);
 				switch (operator_id){
 				case operator_id_type::plus://Return string
 					return concatenate_string_<string_type>(entry, operand, string_id);

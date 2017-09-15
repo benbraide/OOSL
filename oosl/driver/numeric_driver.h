@@ -81,30 +81,34 @@ namespace oosl{
 
 			template <typename target_type>
 			entry_type *evaluate_(entry_type &entry, operator_id_type operator_id, entry_type &operand){
-				auto right = operand.type->driver()->value<target_type>(operand);
+				return evaluate_<target_type>(entry, operator_id, operand.type->driver()->value<target_type>(operand));
+			}
+
+			template <typename target_type>
+			entry_type *evaluate_(entry_type &entry, operator_id_type operator_id, target_type operand){
 				switch (operator_id){
 				case operator_id_type::plus:
-					return post_evaluate_(entry, value<target_type>(entry) + right, false);
+					return post_evaluate_(entry, value<target_type>(entry) + operand, false);
 				case operator_id_type::compound_plus:
-					return post_evaluate_(entry, value<target_type>(entry) + right, true);
+					return post_evaluate_(entry, value<target_type>(entry) + operand, true);
 				case operator_id_type::minus:
-					return post_evaluate_(entry, value<target_type>(entry) - right, false);
+					return post_evaluate_(entry, value<target_type>(entry) - operand, false);
 				case operator_id_type::compound_minus:
-					return post_evaluate_(entry, value<target_type>(entry) - right, true);
+					return post_evaluate_(entry, value<target_type>(entry) - operand, true);
 				case operator_id_type::times:
-					return post_evaluate_(entry, value<target_type>(entry) * right, false);
+					return post_evaluate_(entry, value<target_type>(entry) * operand, false);
 				case operator_id_type::compound_times:
-					return post_evaluate_(entry, value<target_type>(entry) * right, true);
+					return post_evaluate_(entry, value<target_type>(entry) * operand, true);
 				case operator_id_type::divide:
-					if (right == static_cast<target_type>(0))
+					if (operand == static_cast<target_type>(0))
 						return oosl::common::controller::active->find_static_value(static_value_type::nan_);
-					return post_evaluate_(entry, value<target_type>(entry) / right, false);
+					return post_evaluate_(entry, value<target_type>(entry) / operand, false);
 				case operator_id_type::compound_divide:
-					if (right == static_cast<target_type>(0)){//NaN
+					if (operand == static_cast<target_type>(0)){//NaN
 						OOSL_SET(entry.attributes, attribute_type::nan_);
 						return &entry;
 					}
-					return post_evaluate_(entry, value<target_type>(entry) / right, true);
+					return post_evaluate_(entry, value<target_type>(entry) / operand, true);
 				default:
 					break;
 				}
@@ -114,41 +118,42 @@ namespace oosl{
 
 			template <typename target_type>
 			entry_type *evaluate_integral_(entry_type &entry, operator_id_type operator_id, entry_type &operand){
-				if (!operand.type->driver()->type(operand)->is_integral())
-					return evaluate_<target_type>(entry, operator_id, operand);
+				return evaluate_integral_<target_type>(entry, operator_id, operand.type->driver()->value<target_type>(operand));
+			}
 
-				auto right = operand.type->driver()->value<target_type>(operand);
+			template <typename target_type>
+			entry_type *evaluate_integral_(entry_type &entry, operator_id_type operator_id, target_type operand){
 				switch (operator_id){
 				case operator_id_type::modulus:
-					if (right == static_cast<target_type>(0))
+					if (operand == static_cast<target_type>(0))
 						return oosl::common::controller::active->find_static_value(static_value_type::nan_);
-					return post_evaluate_(entry, value<target_type>(entry) % right, false);
+					return post_evaluate_(entry, value<target_type>(entry) % operand, false);
 				case operator_id_type::compound_modulus:
-					if (right == static_cast<target_type>(0)){//NaN
+					if (operand == static_cast<target_type>(0)){//NaN
 						OOSL_SET(entry.attributes, attribute_type::nan_);
 						return &entry;
 					}
-					return post_evaluate_(entry, value<target_type>(entry) % right, true);
+					return post_evaluate_(entry, value<target_type>(entry) % operand, true);
 				case operator_id_type::left_shift:
-					return post_evaluate_(entry, value<target_type>(entry) << right, false);
+					return post_evaluate_(entry, value<target_type>(entry) << operand, false);
 				case operator_id_type::compound_left_shift:
-					return post_evaluate_(entry, value<target_type>(entry) << right, true);
+					return post_evaluate_(entry, value<target_type>(entry) << operand, true);
 				case operator_id_type::right_shift:
-					return post_evaluate_(entry, value<target_type>(entry) >> right, false);
+					return post_evaluate_(entry, value<target_type>(entry) >> operand, false);
 				case operator_id_type::compound_right_shift:
-					return post_evaluate_(entry, value<target_type>(entry) >> right, true);
+					return post_evaluate_(entry, value<target_type>(entry) >> operand, true);
 				case operator_id_type::bitwise_and:
-					return post_evaluate_(entry, value<target_type>(entry) & right, false);
+					return post_evaluate_(entry, value<target_type>(entry) & operand, false);
 				case operator_id_type::compound_bitwise_and:
-					return post_evaluate_(entry, value<target_type>(entry) & right, true);
+					return post_evaluate_(entry, value<target_type>(entry) & operand, true);
 				case operator_id_type::bitwise_or:
-					return post_evaluate_(entry, value<target_type>(entry) | right, false);
+					return post_evaluate_(entry, value<target_type>(entry) | operand, false);
 				case operator_id_type::compound_bitwise_or:
-					return post_evaluate_(entry, value<target_type>(entry) | right, true);
+					return post_evaluate_(entry, value<target_type>(entry) | operand, true);
 				case operator_id_type::bitwise_xor:
-					return post_evaluate_(entry, value<target_type>(entry) ^ right, false);
+					return post_evaluate_(entry, value<target_type>(entry) ^ operand, false);
 				case operator_id_type::compound_bitwise_xor:
-					return post_evaluate_(entry, value<target_type>(entry) ^ right, true);
+					return post_evaluate_(entry, value<target_type>(entry) ^ operand, true);
 				default:
 					break;
 				}

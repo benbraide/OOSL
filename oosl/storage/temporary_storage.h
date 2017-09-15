@@ -10,6 +10,7 @@
 #include "../type/type_mapper.h"
 #include "../memory/memory_manager.h"
 #include "../common/controller.h"
+#include "../common/error_codes.h"
 
 namespace oosl{
 	namespace storage{
@@ -20,6 +21,8 @@ namespace oosl{
 
 			typedef oosl::type::object::ptr_type type_ptr_type;
 			typedef std::list<entry_type> entry_list_type;
+
+			typedef oosl::memory::block::attribute_type memory_attribute_type;
 
 			virtual ~temporary();
 
@@ -46,7 +49,35 @@ namespace oosl{
 				});
 			}
 
+			entry_type *add_scalar(const std::string &value);
+
+			entry_type *add_scalar(const std::wstring &value);
+
 		protected:
+			template <typename string_type>
+			entry_type *add_string_scalar_(const string_type &value, type_ptr_type type){
+				typedef typename string_type::traits_type::char_type char_type;
+
+				auto string_block = oosl::common::controller::active->memory().allocate(static_cast<std::size_t>((value.size() + 1) * sizeof(char_type)));
+				if (string_block == nullptr)//Error
+					throw common::error_codes::out_of_memory;
+
+				auto holder_block = oosl::common::controller::active->memory().allocate_scalar(string_block->address);
+				if (holder_block == nullptr)//Error
+					throw common::error_codes::out_of_memory;
+
+				memcpy(string_block->ptr, value.c_str(), string_block->size);
+				OOSL_SET(string_block->attributes, memory_attribute_type::immutable);
+				OOSL_SET(holder_block->attributes, memory_attribute_type::indirect);
+
+				return &*entry_list_.emplace(entry_list_.end(), entry_type{
+					nullptr,
+					holder_block->address,
+					entry_attribute_type::nil,
+					type
+				});
+			}
+
 			entry_list_type entry_list_;
 		};
 	}
