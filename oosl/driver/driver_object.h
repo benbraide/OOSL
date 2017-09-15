@@ -120,14 +120,31 @@ namespace oosl{
 					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) < operand) ? bool_type::true_ : bool_type::false_);
 				case operator_id_type::less_or_equal:
 					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) <= operand) ? bool_type::true_ : bool_type::false_);
-				case operator_id_type::equality:
-					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) == operand) ? bool_type::true_ : bool_type::false_);
-				case operator_id_type::inverse_equality:
-					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) != operand) ? bool_type::true_ : bool_type::false_);
 				case operator_id_type::more_or_equal:
 					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) >= operand) ? bool_type::true_ : bool_type::false_);
 				case operator_id_type::more:
 					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) > operand) ? bool_type::true_ : bool_type::false_);
+				default:
+					break;
+				}
+
+				return evaluate_equality_<target_type>(entry, operator_id, operand);
+			}
+
+			template <typename target_type>
+			entry_type *evaluate_equality_(entry_type &entry, operator_id_type operator_id, entry_type &operand){
+				return evaluate_equality_<target_type>(entry, operator_id, operand.type->driver()->value<target_type>(operand));
+			}
+
+			template <typename target_type>
+			entry_type *evaluate_equality_(entry_type &entry, operator_id_type operator_id, target_type operand){
+				switch (operator_id){
+				case operator_id_type::explicit_equality:
+				case operator_id_type::equality:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) == operand) ? bool_type::true_ : bool_type::false_);
+				case operator_id_type::explicit_inverse_equality:
+				case operator_id_type::inverse_equality:
+					return oosl::common::controller::active->temporary_storage().add_scalar((value<target_type>(entry) != operand) ? bool_type::true_ : bool_type::false_);
 				default:
 					break;
 				}

@@ -9,6 +9,10 @@ oosl::driver::object::entry_type *oosl::driver::char_driver::cast(entry_type &en
 			return common::controller::active->temporary_storage().add_scalar(value<char>(entry));
 		case type_id_type::wchar_:
 			return common::controller::active->temporary_storage().add_scalar(value<wchar_t>(entry));
+		case type_id_type::string_:
+			return common::controller::active->temporary_storage().add_scalar(std::string(1u, value<char>(entry)));
+		case type_id_type::wstring_:
+			return common::controller::active->temporary_storage().add_scalar(std::wstring(1u, value<wchar_t>(entry)));
 		default:
 			break;
 		}

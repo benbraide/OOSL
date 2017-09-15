@@ -4,7 +4,7 @@ oosl::driver::numeric::~numeric() = default;
 
 oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry, type_object_type &type, cast_option_type options){
 	if (!OOSL_IS_ANY(options, cast_option_type::reinterpret | cast_option_type::ref) && !type.is_ref()){
-		switch (entry.type->id()){
+		switch (type.id()){
 		case type_id_type::int8_:
 			return common::controller::active->temporary_storage().add_scalar(value<__int8>(entry));
 		case type_id_type::uint8_:
@@ -31,6 +31,10 @@ oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry,
 			return common::controller::active->temporary_storage().add_scalar(value<double>(entry));
 		case type_id_type::ldouble:
 			return common::controller::active->temporary_storage().add_scalar(value<long double>(entry));
+		case type_id_type::string_:
+			return common::controller::active->temporary_storage().add_scalar(value<std::string>(entry));
+		case type_id_type::wstring_:
+			return common::controller::active->temporary_storage().add_scalar(value<std::wstring>(entry));
 		default:
 			break;
 		}
