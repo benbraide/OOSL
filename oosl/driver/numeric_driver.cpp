@@ -3,7 +3,10 @@
 oosl::driver::numeric::~numeric() = default;
 
 oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry, type_object_type &type, cast_option_type options){
-	if (!OOSL_IS_ANY(options, cast_option_type::reinterpret | cast_option_type::ref) && !type.is_ref()){
+	if (OOSL_IS(options, cast_option_type::ref) || type.is_ref())
+		return object::cast(entry, type, options);//Reference cast
+
+	if (!OOSL_IS(options, cast_option_type::reinterpret)){
 		switch (type.id()){
 		case type_id_type::int8_:
 			return common::controller::active->temporary_storage().add_scalar(value<__int8>(entry));
@@ -39,6 +42,9 @@ oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry,
 			break;
 		}
 	}
+
+	if (OOSL_IS(options, cast_option_type::reinterpret) && entry.type->is_integral() && type.is_strong_pointer())//Reinterpret cast
+		return common::controller::active->temporary_storage().add_scalar(value<uint64_type>(entry), type.reflect());
 
 	return object::cast(entry, type, options);
 }

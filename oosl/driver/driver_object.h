@@ -26,6 +26,7 @@ namespace oosl{
 
 			typedef common::error_codes error_type;
 			typedef common::output_writer output_writer_type;
+			typedef output_writer_type::write_option_type write_option_type;
 
 			typedef common::controller controller_type;
 			typedef controller_type::static_value_type static_value_type;

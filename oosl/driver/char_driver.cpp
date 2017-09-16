@@ -65,13 +65,20 @@ oosl::driver::object::entry_type *oosl::driver::char_driver::evaluate_(entry_typ
 	if (operand_type->id() != entry.type->id())//Different types
 		return object::evaluate_(entry, operator_info, operand);
 
-	switch (entry.type->id()){
-	case type_id_type::char_:
-		return evaluate_<char, std::string>(entry, operator_info.id, operand, type_id_type::string_);
-	case type_id_type::wchar_:
-		return evaluate_<wchar_t, std::wstring>(entry, operator_info.id, operand, type_id_type::wstring_);
-	default:
-		break;
+	try{//Guard
+		switch (entry.type->id()){
+		case type_id_type::char_:
+			return evaluate_<char, std::string>(entry, operator_info.id, operand, type_id_type::string_);
+		case type_id_type::wchar_:
+			return evaluate_<wchar_t, std::wstring>(entry, operator_info.id, operand, type_id_type::wstring_);
+		default:
+			break;
+		}
+	}
+	catch (error_type error){//Error
+		if (error == error_type::not_implemented)
+			throw error_type::unhandled_operator;
+		throw;//Forward exception
 	}
 
 	return object::evaluate_(entry, operator_info, operand);

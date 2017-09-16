@@ -27,7 +27,7 @@ namespace oosl{
 			void echo_(entry_type &entry, output_writer_type &writer, type_id_type id){
 				target_type target;
 				value(entry, id, reinterpret_cast<char *>(&target));
-				writer.write(target.c_str());
+				writer.write(target.c_str(), write_option_type::char_value);
 			}
 
 			template <typename from_type>
