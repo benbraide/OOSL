@@ -124,7 +124,7 @@ namespace oosl{
 					return "";
 
 				auto strip_leading_zeros = false;
-				if (width == static_cast<std::size_t>(-1)){//(sizeof(value_type) << 1)
+				if (width == static_cast<std::size_t>(-1)){//Compute width
 					strip_leading_zeros = true;
 					switch (base){
 					case 32u://Base-32

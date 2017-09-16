@@ -19,9 +19,10 @@ namespace oosl{
 			typedef oosl::storage::entry entry_type;
 			typedef entry_type::attribute_type entry_attribute_type;
 
+			typedef oosl::type::bool_type bool_type;
 			typedef oosl::type::object::ptr_type type_ptr_type;
-			typedef std::list<entry_type> entry_list_type;
 
+			typedef std::list<entry_type> entry_list_type;
 			typedef oosl::memory::block::attribute_type memory_attribute_type;
 
 			virtual ~temporary();
@@ -48,6 +49,8 @@ namespace oosl{
 					type
 				});
 			}
+
+			entry_type *add_scalar(bool_type value);
 
 			entry_type *add_scalar(const std::string &value);
 
