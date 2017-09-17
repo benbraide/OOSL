@@ -88,6 +88,8 @@ namespace oosl{
 
 			void remove_dependency(uint64_type address);
 
+			dependency_ptr_type find_dependency(uint64_type address);
+
 			uint64_type add_watcher(const watcher_range_type &range, watcher_ptr_type value);
 
 			void remove_watcher(uint64_type id);

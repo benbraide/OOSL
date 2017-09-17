@@ -69,6 +69,8 @@ namespace oosl{
 
 			virtual entry_type *linked(entry_type &entry);
 
+			virtual entry_type *duplicate(entry_type &entry);
+
 			virtual attribute_type attributes(entry_type &entry);
 
 			virtual entry_type *evaluate(entry_type &entry, unary_operator_info_type &operator_info);

@@ -61,6 +61,12 @@ void oosl::memory::manager::remove_dependency(uint64_type address){
 	dependencies_.erase(address);
 }
 
+oosl::memory::manager::dependency_ptr_type oosl::memory::manager::find_dependency(uint64_type address){
+	lock_once_type guard(lock_, shared_locker);
+	auto entry = dependencies_.find(address);
+	return ((entry == dependencies_.end()) ? nullptr : entry->second);
+}
+
 oosl::memory::manager::uint64_type oosl::memory::manager::add_watcher(const watcher_range_type &range, watcher_ptr_type value){
 	if (is_torn())
 		return 0ull;

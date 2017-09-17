@@ -56,6 +56,28 @@ oosl::driver::object::entry_type *oosl::driver::object::linked(entry_type &entry
 	throw error_type::not_implemented;
 }
 
+oosl::driver::object::entry_type *oosl::driver::object::duplicate(entry_type &entry){
+	auto entry_block = common::controller::active->memory().find_block(entry.address);
+	if (entry_block == nullptr)//Error
+		throw error_type::invalid_address;
+
+	if (!OOSL_IS(entry.attributes, attribute_type::lval)){//Use temporary value
+		++entry_block->ref_count;//Prevent owner storage from deleting memory
+		return &entry;
+	}
+
+	auto copied_value = common::controller::active->temporary_storage().add(entry_block->actual_size);
+	auto copied_value_block = common::controller::active->memory().find_block(copied_value->address);
+
+	copied_value->type = entry.type;
+	memcpy(copied_value_block->ptr, entry_block->ptr, entry_block->actual_size);
+
+	OOSL_SET(copied_value_block->attributes, entry_block->attributes);
+	++copied_value_block->ref_count;//Prevent temporary storage from deleting memory
+
+	return copied_value;
+}
+
 oosl::driver::object::attribute_type oosl::driver::object::attributes(entry_type &entry){
 	auto attributes = entry.attributes;
 	if (entry.type->is_ref())
@@ -140,27 +162,27 @@ void oosl::driver::object::initialize(entry_type &entry){
 }
 
 bool oosl::driver::object::is_lval(entry_type &entry){
-	return OOSL_IS(attributes(entry), attribute_type::lval);
+	return (OOSL_IS(entry.attributes, attribute_type::lval) || entry.type->is_ref());
 }
 
 bool oosl::driver::object::is_ref(entry_type &entry){
-	return OOSL_IS(attributes(entry), attribute_type::ref_);
+	return (OOSL_IS(entry.attributes, attribute_type::ref_) || entry.type->is_ref());
 }
 
 bool oosl::driver::object::is_uninitialized(entry_type &entry){
-	return OOSL_IS(attributes(entry), attribute_type::uninitialized);
+	return OOSL_IS(entry.attributes, attribute_type::uninitialized);
 }
 
 bool oosl::driver::object::is_tls(entry_type &entry){
-	return OOSL_IS(attributes(entry), attribute_type::tls);
+	return (OOSL_IS(entry.attributes, attribute_type::tls) || entry.type->is_thread_local());
 }
 
 bool oosl::driver::object::is_nan(entry_type &entry){
-	return OOSL_IS(attributes(entry), attribute_type::nan_);
+	return (OOSL_IS(entry.attributes, attribute_type::nan_) || entry.type->is_nan());
 }
 
 bool oosl::driver::object::is_void(entry_type &entry){
-	return OOSL_IS(attributes(entry), attribute_type::void_);
+	return (OOSL_IS(entry.attributes, attribute_type::void_) || entry.type->is_void());
 }
 
 void oosl::driver::object::echo(entry_type &entry){
