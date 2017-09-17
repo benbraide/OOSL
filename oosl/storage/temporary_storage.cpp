@@ -31,3 +31,12 @@ oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(const
 oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(const std::wstring &value){
 	return add_string_scalar_(value, common::controller::active->find_type(type::id::wstring_));
 }
+
+oosl::storage::temporary::entry_type *oosl::storage::temporary::wrap(uint64_type address, type_ptr_type type, entry_attribute_type attributes){
+	return &*entry_list_.emplace(entry_list_.end(), entry_type{
+		nullptr,
+		address,
+		attributes,
+		type
+	});
+}

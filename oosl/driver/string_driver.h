@@ -14,14 +14,14 @@ namespace oosl{
 
 			virtual ~string_driver();
 
-			virtual entry_type *cast(entry_type &entry, type_object_type &type, cast_option_type options = cast_option_type::nil) override;
-
 			virtual void echo(entry_type &entry, output_writer_type &writer) override;
 
 			virtual void value(entry_type &entry, type_id_type to, char *destination) override;
 
 		protected:
 			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
+
+			virtual entry_type *assign_(entry_type &entry, entry_type &value) override;
 
 			template <typename target_type>
 			void echo_(entry_type &entry, output_writer_type &writer){
@@ -37,12 +37,10 @@ namespace oosl{
 				auto string_address = oosl::common::controller::active->memory().read<uint64_type>(entry.address);
 				auto string_block = oosl::common::controller::active->memory().find_block(string_address);
 
-				if (string_block == nullptr){//Copy value
-					if (string_block->size > 1u)
-						target.assign((char_type *)string_block->ptr, (string_block->size - 1));
-				}
-				else//Error
+				if (string_block == nullptr)//Error
 					throw error_type::invalid_address;
+				else if (string_block->size > 1u)//Copy non-empty value
+					target.assign((char_type *)string_block->ptr, (string_block->size - 1));
 			}
 
 			template <typename from_type>

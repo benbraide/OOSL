@@ -45,11 +45,11 @@ oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entr
 	if (operator_info.is_left){
 		switch (operator_info.id){
 		case operator_id_type::bitwise_inverse:
-			return post_evaluate_(entry, ~value<uint8_type>(entry), false);
+			return post_evaluate_(entry, ~value<uint8_type>(entry));
 		case operator_id_type::decrement:
-			return post_evaluate_(entry, (value<uint8_type>(entry) - static_cast<uint8_type>(1)), true);
+			return post_evaluate_(entry, (value<uint8_type>(entry) - static_cast<uint8_type>(1)), post_evaluation_type::assign);
 		case operator_id_type::increment:
-			return post_evaluate_(entry, (value<uint8_type>(entry) + static_cast<uint8_type>(1)), true);
+			return post_evaluate_(entry, (value<uint8_type>(entry) + static_cast<uint8_type>(1)), post_evaluation_type::assign);
 		default:
 			break;
 		}
@@ -57,9 +57,9 @@ oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entr
 	else{//Right
 		switch (operator_info.id){
 		case operator_id_type::decrement:
-			return post_evaluate_(entry, (value<uint8_type>(entry) - static_cast<uint8_type>(1)), true, true);
+			return post_evaluate_(entry, (value<uint8_type>(entry) - static_cast<uint8_type>(1)), (post_evaluation_type::assign | post_evaluation_type::value_return));
 		case operator_id_type::increment:
-			return post_evaluate_(entry, (value<uint8_type>(entry) + static_cast<uint8_type>(1)), true, true);
+			return post_evaluate_(entry, (value<uint8_type>(entry) + static_cast<uint8_type>(1)), (post_evaluation_type::assign | post_evaluation_type::value_return));
 		default:
 			break;
 		}
@@ -75,46 +75,28 @@ oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entr
 oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entry, operator_id_type operator_id, uint8_type operand){
 	switch (operator_id){
 	case operator_id_type::left_shift:
-		return post_evaluate_(entry, value<uint8_type>(entry) << operand, false);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) << operand));
 	case operator_id_type::compound_left_shift:
-		return post_evaluate_(entry, value<uint8_type>(entry) << operand, true);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) << operand), post_evaluation_type::assign);
 	case operator_id_type::right_shift:
-		return post_evaluate_(entry, value<uint8_type>(entry) >> operand, false);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) >> operand));
 	case operator_id_type::compound_right_shift:
-		return post_evaluate_(entry, value<uint8_type>(entry) >> operand, true);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) >> operand), post_evaluation_type::assign);
 	case operator_id_type::bitwise_and:
-		return post_evaluate_(entry, value<uint8_type>(entry) & operand, false);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) & operand));
 	case operator_id_type::compound_bitwise_and:
-		return post_evaluate_(entry, value<uint8_type>(entry) & operand, true);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) & operand), post_evaluation_type::assign);
 	case operator_id_type::bitwise_or:
-		return post_evaluate_(entry, value<uint8_type>(entry) | operand, false);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) | operand));
 	case operator_id_type::compound_bitwise_or:
-		return post_evaluate_(entry, value<uint8_type>(entry) | operand, true);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) | operand), post_evaluation_type::assign);
 	case operator_id_type::bitwise_xor:
-		return post_evaluate_(entry, value<uint8_type>(entry) ^ operand, false);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) ^ operand));
 	case operator_id_type::compound_bitwise_xor:
-		return post_evaluate_(entry, value<uint8_type>(entry) ^ operand, true);
+		return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) ^ operand), post_evaluation_type::assign);
 	default:
 		break;
 	}
 
 	return evaluate_boolean_<uint8_type>(entry, operator_id, operand);
-}
-
-oosl::driver::object::entry_type *oosl::driver::byte::post_evaluate_(entry_type &entry, uint8_type value, bool assign, bool value_return){
-	if (!assign)//Temporary value
-		return oosl::common::controller::active->temporary_storage().add_scalar(value, entry.type);
-
-	if (!is_lval(entry))
-		throw error_type::rval_assignment;
-
-	auto block = oosl::common::controller::active->memory().find_block(entry.address);
-	if (block == nullptr)//Error
-		throw error_type::invalid_address;
-
-	memcpy(block->ptr, &value, block->size);
-	if (value_return)//Return value
-		return oosl::common::controller::active->temporary_storage().add_scalar(value, entry.type);
-
-	return &entry;
 }

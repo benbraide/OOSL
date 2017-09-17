@@ -2,21 +2,6 @@
 
 oosl::driver::string_driver::~string_driver() = default;
 
-oosl::driver::object::entry_type *oosl::driver::string_driver::cast(entry_type &entry, type_object_type &type, cast_option_type options){
-	if (!OOSL_IS_ANY(options, cast_option_type::reinterpret | cast_option_type::ref) && !type.is_ref()){
-		switch (type.id()){
-		case type_id_type::string_:
-			return common::controller::active->temporary_storage().add_scalar(value<std::string>(entry));
-		case type_id_type::wstring_:
-			return common::controller::active->temporary_storage().add_scalar(value<std::wstring>(entry));
-		default:
-			break;
-		}
-	}
-
-	return object::cast(entry, type, options);
-}
-
 void oosl::driver::string_driver::echo(entry_type &entry, output_writer_type &writer){
 	switch (entry.type->id()){
 	case type_id_type::string_:
@@ -63,4 +48,16 @@ oosl::driver::object::entry_type *oosl::driver::string_driver::evaluate_(entry_t
 	}
 
 	return object::evaluate_(entry, operator_info, operand);
+}
+
+oosl::driver::object::entry_type *oosl::driver::string_driver::assign_(entry_type &entry, entry_type &value){
+	auto string_address = oosl::common::controller::active->memory().read<uint64_type>(entry.address);
+	auto string_block = oosl::common::controller::active->memory().find_block(string_address);
+	if (string_block == nullptr)//Error
+		throw error_type::invalid_address;
+
+	oosl::common::controller::active->memory().copy(entry.address, value.address, sizeof(uint64_type));
+	++string_block->ref_count;
+
+	return &entry;
 }

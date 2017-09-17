@@ -1,20 +1,18 @@
 #pragma once
 
-#ifndef OOSL_BYTE_DRIVER_H
-#define OOSL_BYTE_DRIVER_H
+#ifndef OOSL_POINTER_DRIVER_H
+#define OOSL_POINTER_DRIVER_H
 
 #include "driver_object.h"
 
 namespace oosl{
 	namespace driver{
-		class byte : public object{
+		class pointer : public object{
 		public:
-			typedef unsigned __int8 uint8_type;
-
 			using object::echo;
 			using object::value;
 
-			virtual ~byte();
+			virtual ~pointer();
 
 			virtual entry_type *cast(entry_type &entry, type_object_type &type, cast_option_type options = cast_option_type::nil) override;
 
@@ -22,14 +20,18 @@ namespace oosl{
 
 			virtual void value(entry_type &entry, type_id_type to, char *destination) override;
 
+			virtual entry_type *target_entry(entry_type &entry, long long offset = 0ll);
+
+			virtual long long pre_multiply(entry_type &entry, long long value);
+
 		protected:
 			virtual entry_type *evaluate_(entry_type &entry, unary_operator_info_type &operator_info) override;
 
 			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
 
-			virtual entry_type *evaluate_(entry_type &entry, operator_id_type operator_id, uint8_type operand);
+			virtual entry_type *offset_entry_(entry_type &entry, long long offset, bool assign = false);
 		};
 	}
 }
 
-#endif /* !OOSL_BYTE_DRIVER_H */
+#endif /* !OOSL_POINTER_DRIVER_H */

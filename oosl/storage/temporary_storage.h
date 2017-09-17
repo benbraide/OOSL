@@ -16,6 +16,8 @@ namespace oosl{
 	namespace storage{
 		class temporary{
 		public:
+			typedef unsigned __int64 uint64_type;
+
 			typedef oosl::storage::entry entry_type;
 			typedef entry_type::attribute_type entry_attribute_type;
 
@@ -55,6 +57,8 @@ namespace oosl{
 			entry_type *add_scalar(const std::string &value);
 
 			entry_type *add_scalar(const std::wstring &value);
+
+			entry_type *wrap(uint64_type address, type_ptr_type type, entry_attribute_type attributes = entry_attribute_type::nil);
 
 		protected:
 			template <typename string_type>

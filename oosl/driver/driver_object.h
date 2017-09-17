@@ -50,6 +50,13 @@ namespace oosl{
 				make_copy		= (1 << 0x0004),
 			};
 
+			enum class post_evaluation_type : unsigned int{
+				nil					= (0 << 0x0000),
+				assign				= (1 << 0x0000),
+				value_return		= (1 << 0x0001),
+				byte				= (1 << 0x0002),
+			};
+
 			virtual ~object();
 
 			virtual entry_type *cast(entry_type &entry, type_object_type &type, cast_option_type options = cast_option_type::nil);
@@ -163,9 +170,35 @@ namespace oosl{
 
 				return oosl::common::controller::active->temporary_storage().add_scalar(left + right);
 			}
+
+			template <typename target_type>
+			entry_type *post_evaluate_(entry_type &entry, target_type value, post_evaluation_type options = post_evaluation_type::nil){
+				if (!OOSL_IS(options, post_evaluation_type::assign)){//Temporary value
+					if (!OOSL_IS(options, post_evaluation_type::byte))
+						return oosl::common::controller::active->temporary_storage().add_scalar(value);
+					return oosl::common::controller::active->temporary_storage().add_scalar(value, oosl::common::controller::active->find_type(type_id_type::byte_));
+				}
+
+				if (!is_lval(entry))
+					throw error_type::rval_assignment;
+
+				auto block = oosl::common::controller::active->memory().find_block(entry.address);
+				if (block == nullptr)//Error
+					throw error_type::invalid_address;
+
+				memcpy(block->ptr, &value, block->size);
+				if (OOSL_IS(options, post_evaluation_type::value_return)){//Return value
+					if (!OOSL_IS(options, post_evaluation_type::byte))
+						return oosl::common::controller::active->temporary_storage().add_scalar(value, entry.type);
+					return oosl::common::controller::active->temporary_storage().add_scalar(value, oosl::common::controller::active->find_type(type_id_type::byte_));
+				}
+
+				return &entry;
+			}
 		};
 
 		OOSL_MAKE_OPERATORS(object::cast_option_type);
+		OOSL_MAKE_OPERATORS(object::post_evaluation_type);
 	}
 }
 

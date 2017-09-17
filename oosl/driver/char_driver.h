@@ -75,11 +75,6 @@ namespace oosl{
 
 				return evaluate_boolean_<target_type>(entry, operator_id, operand);
 			}
-
-			template <typename target_type>
-			entry_type *post_evaluate_(entry_type &entry, target_type value, bool assign, bool value_return = false){
-				return oosl::common::controller::active->temporary_storage().add_scalar(value);
-			}
 		};
 	}
 }
