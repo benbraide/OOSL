@@ -25,6 +25,8 @@ namespace oosl{
 
 			virtual entry_type *evaluate(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
 
+			virtual entry_type *assign(entry_type &entry, entry_type &value) override;
+
 			virtual void initialize(entry_type &entry) override;
 
 			virtual void echo(entry_type &entry, output_writer_type &writer) override;

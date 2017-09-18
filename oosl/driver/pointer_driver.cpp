@@ -37,8 +37,19 @@ oosl::driver::object::entry_type *oosl::driver::pointer::cast(entry_type &entry,
 }
 
 void oosl::driver::pointer::echo(entry_type &entry, output_writer_type &writer){
+	if (OOSL_IS(entry.attributes, attribute_type::uninitialized)){//Uninitialized
+		writer.write("<undefined>");
+		return;
+	}
+
+	auto target_value = value<uint64_type>(entry);
+	if (target_value == 0u){//Null pointer
+		writer.write("nullptr");
+		return;
+	}
+
 	auto target = target_entry(entry);
-	auto string_value = common::controller::convert_base(value<uint64_type>(entry), 16, (sizeof(uint64_type) << 1));
+	auto string_value = common::controller::convert_base(target_value, 16, (sizeof(uint64_type) << 1));
 
 	writer.write("<");
 	writer.write(string_value.c_str());

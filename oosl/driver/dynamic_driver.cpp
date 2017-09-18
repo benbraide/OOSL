@@ -56,11 +56,24 @@ oosl::driver::object::entry_type *oosl::driver::dynamic_driver::evaluate(entry_t
 	return linked_target->type->driver()->evaluate(*linked_target, operator_info, operand);
 }
 
+oosl::driver::object::entry_type *oosl::driver::dynamic_driver::assign(entry_type &entry, entry_type &value){
+	if (!OOSL_IS(entry.attributes, attribute_type::uninitialized)){//Linked assignment
+		auto linked_target = linked(entry);
+		return linked_target->type->driver()->assign(*linked_target, value);
+	}
+
+	return object::assign(entry, value);
+}
+
 void oosl::driver::dynamic_driver::initialize(entry_type &entry){}
 
 void oosl::driver::dynamic_driver::echo(entry_type &entry, output_writer_type &writer){
-	auto linked_target = linked(entry);
-	linked_target->type->driver()->echo(*linked_target);
+	if (!OOSL_IS(entry.attributes, attribute_type::uninitialized)){
+		auto linked_target = linked(entry);
+		linked_target->type->driver()->echo(*linked_target);
+	}
+	else//Uninitialized
+		writer.write("<undefined>");
 }
 
 void oosl::driver::dynamic_driver::value(entry_type &entry, type_id_type to, char *destination){
@@ -69,11 +82,22 @@ void oosl::driver::dynamic_driver::value(entry_type &entry, type_id_type to, cha
 }
 
 oosl::driver::object::entry_type *oosl::driver::dynamic_driver::assign_(entry_type &entry, entry_type &value){
+	if (entry.type->is_ref()){
+		auto value_type = value.type->driver()->type(value);
+		if (entry.type->score(*value_type) < (OOSL_MAX_TYPE_SCORE - 2))
+			throw error_type::unhandled_operator;
+	}
+	
 	auto dependency = common::controller::active->memory().find_dependency(entry.address);
 	if (dependency == nullptr){//Set dependency
-		common::controller::active->memory().add_dependency(entry.address, (dependency = std::make_shared<dependency_type>(*duplicate(value))));
+		if (entry.type->is_ref())
+			common::controller::active->memory().add_dependency(entry.address, (dependency = std::make_shared<dependency_type>(value)));
+		else//Non-reference
+			common::controller::active->memory().add_dependency(entry.address, (dependency = std::make_shared<dependency_type>(*duplicate(value))));
 		OOSL_REMOVE(entry.attributes, attribute_type::uninitialized);
 	}
+	else if (entry.type->is_ref())//Reference update
+		dynamic_cast<dependency_type *>(dependency.get())->value() = value;
 	else//Update value
 		dynamic_cast<dependency_type *>(dependency.get())->value() = *duplicate(value);
 
