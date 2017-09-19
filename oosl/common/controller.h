@@ -36,15 +36,12 @@ namespace oosl{
 		struct runtime_block_info;
 		struct runtime_info;
 
-		class error;
 		class output_writer;
 
 		class controller{
 		public:
 			typedef interpreter_info interpreter_info_type;
 			typedef runtime_info runtime_info_type;
-
-			typedef error error_type;
 			typedef output_writer output_writer_type;
 
 			typedef oosl::memory::manager memory_manager_type;
@@ -98,8 +95,6 @@ namespace oosl{
 			virtual void on_exception(callback_type callback) = 0;
 
 			virtual void on_exception_pop() = 0;
-
-			virtual error_type &error() = 0;
 
 			virtual output_writer_type &output_writer() = 0;
 
