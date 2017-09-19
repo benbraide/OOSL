@@ -44,11 +44,11 @@ int main(){
 					ls += (item + "\n");
 
 				std::cout << ls;
-				return interactive_type::action_result_type::nil;
 			}
+			else//Run test
+				oosl::test::run(value.c_str());
 
-			oosl::test::run(value.c_str());
-			return interactive_type::action_result_type::quit;
+			return interactive_type::action_result_type::nil;
 		});
 
 		io.run();

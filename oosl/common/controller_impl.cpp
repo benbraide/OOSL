@@ -1,7 +1,7 @@
 #include "controller_impl.h"
 
 oosl::common::controller_impl::controller_impl()
-	: global_storage_(""){
+	: global_storage_(""), output_stream_writer_(std::cout, std::wcout), error_output_stream_writer_(std::cerr, std::wcerr){
 	if (active == nullptr)
 		active = this;
 	else//Multiple controller instances
@@ -33,11 +33,11 @@ void oosl::common::controller_impl::on_exception_pop(){
 }
 
 oosl::common::controller::output_writer_type &oosl::common::controller_impl::output_writer(){
-	throw error_codes::not_implemented;
+	return output_stream_writer_;
 }
 
 oosl::common::controller::output_writer_type &oosl::common::controller_impl::error_output_writer(){
-	throw error_codes::not_implemented;
+	return error_output_stream_writer_;
 }
 
 oosl::common::controller::memory_manager_type &oosl::common::controller_impl::memory(){

@@ -3,8 +3,11 @@
 #ifndef OOSL_CONTROLLER_IMPL_H
 #define OOSL_CONTROLLER_IMPL_H
 
+#include <iostream>
+
 #include "controller.h"
 #include "structures.h"
+#include "output_stream_writer.h"
 
 #include "../driver/boolean_driver.h"
 #include "../driver/byte_driver.h"
@@ -21,6 +24,7 @@ namespace oosl{
 		class controller_impl : public controller{
 		public:
 			typedef oosl::storage::named named_storage_type;
+			typedef output_stream_writer<std::ostream, std::wostream> output_stream_writer_type;
 
 			typedef std::unordered_map<type_id_type, type_object_ptr_type> type_object_ptr_list_type;
 			typedef std::unordered_map<static_value_type, storage_entry_type *> static_value_list_type;
@@ -62,6 +66,8 @@ namespace oosl{
 			memory_manager_type memory_manager_;
 			temporary_storage_type internal_temporary_storage_;
 			named_storage_type global_storage_;
+			output_stream_writer_type output_stream_writer_;
+			output_stream_writer_type error_output_stream_writer_;
 			type_object_ptr_list_type type_list_;
 			static_value_list_type static_value_list_;
 			driver_object_list_type driver_list_;

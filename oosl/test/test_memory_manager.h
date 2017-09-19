@@ -74,7 +74,7 @@ DOCTEST_TEST_CASE("memory manager test"){
 			DOCTEST_CHECK(fourth_allocation->address > third_allocation->address);
 			DOCTEST_CHECK(fourth_allocation->size == sizeof(float));
 			DOCTEST_CHECK(fourth_allocation->size == fourth_allocation->actual_size);
-			DOCTEST_CHECK(fourth_allocation->attributes != oosl::memory::manager::attribute_type::nil);
+			DOCTEST_CHECK(fourth_allocation->attributes == oosl::memory::manager::attribute_type::nil);
 
 			DOCTEST_CHECK(fifth_allocation->address == reserved_address);
 			DOCTEST_CHECK(fifth_allocation->size == 32u);

@@ -17,13 +17,13 @@ namespace oosl{
 
 			virtual ~output_writer() = default;
 
+			virtual void begin() = 0;
+
+			virtual void end() = 0;
+
 			virtual void write(const char *value, write_option_type options = write_option_type::nil) = 0;
 
 			virtual void write(const wchar_t *value, write_option_type options = write_option_type::nil) = 0;
-
-			virtual void error(const char *value, write_option_type options = write_option_type::nil) = 0;
-
-			virtual void error(const wchar_t *value, write_option_type options = write_option_type::nil) = 0;
 		};
 
 		OOSL_MAKE_OPERATORS(output_writer::write_option_type);

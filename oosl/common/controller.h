@@ -106,6 +106,8 @@ namespace oosl{
 
 			virtual temporary_storage_type &temporary_storage() = 0;
 
+			virtual void set_temporary_storage(temporary_storage_type &value) = 0;
+
 			virtual type_object_ptr_type find_type(type_id_type id) = 0;
 
 			virtual storage_entry_type *find_static_value(static_value_type type) = 0;
