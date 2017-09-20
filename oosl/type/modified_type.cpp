@@ -6,7 +6,7 @@ oosl::type::modified::modified(ptr_type underlying_type, attribute attributes)
 oosl::type::modified::~modified() = default;
 
 oosl::type::object::driver_type *oosl::type::modified::driver(){
-	return ((is_ref() && !is_rval_ref()) ? nullptr : underlying_type_->driver());//#TODO: Implement
+	return ((is_ref() && !is_rval_ref()) ? controller_type::active->find_driver(driver_key_type::dynamic) : underlying_type_->driver());
 }
 
 oosl::type::object *oosl::type::modified::underlying_type(){

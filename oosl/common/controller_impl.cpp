@@ -40,6 +40,9 @@ oosl::common::controller_impl::controller_impl()
 	driver_list_[driver_type::string] = std::make_shared<oosl::driver::string_driver>();
 	driver_list_[driver_type::pointer] = std::make_shared<oosl::driver::pointer>();
 	driver_list_[driver_type::dynamic] = std::make_shared<oosl::driver::dynamic_driver>();
+
+	output_writer_list_[output_writer_key_type::nil] = &output_stream_writer_;
+	output_writer_list_[output_writer_key_type::error] = &error_output_stream_writer_;
 }
 
 oosl::common::controller_impl::~controller_impl(){
@@ -66,12 +69,29 @@ void oosl::common::controller_impl::on_exception_pop(){
 	throw error_codes::not_implemented;
 }
 
-oosl::common::controller::output_writer_type &oosl::common::controller_impl::output_writer(){
-	return output_stream_writer_;
+oosl::common::controller::output_writer_type &oosl::common::controller_impl::output_writer(output_writer_key_type type){
+	auto entry = output_writer_list_.find(type);
+	if (entry == output_writer_list_.end())//Not found
+		throw error_codes::writer_not_found;
+
+	return *entry->second;
 }
 
-oosl::common::controller::output_writer_type &oosl::common::controller_impl::error_output_writer(){
-	return error_output_stream_writer_;
+void oosl::common::controller_impl::output_writer(output_writer_key_type type, output_writer_type &value){
+	output_writer_list_[type] = &value;
+}
+
+void oosl::common::controller_impl::restore_output_writer(output_writer_key_type type){
+	switch (type){
+	case output_writer_key_type::nil:
+		output_writer_list_[type] = &output_stream_writer_;
+		break;
+	case output_writer_key_type::error:
+		output_writer_list_[type] = &error_output_stream_writer_;
+		break;
+	default:
+		break;
+	}
 }
 
 oosl::common::controller::memory_manager_type &oosl::common::controller_impl::memory(){
@@ -98,7 +118,10 @@ oosl::common::controller::storage_entry_type *oosl::common::controller_impl::fin
 
 oosl::common::controller::driver_object_type *oosl::common::controller_impl::find_driver(driver_type type){
 	auto entry = driver_list_.find(type);
-	return ((entry == driver_list_.end()) ? nullptr : entry->second.get());
+	if (entry == driver_list_.end())
+		throw error_codes::driver_not_found;
+
+	return entry->second.get();
 }
 
 thread_local oosl::common::controller::runtime_info_type oosl::common::controller_impl::runtime_info_{};

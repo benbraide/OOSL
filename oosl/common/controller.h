@@ -87,6 +87,11 @@ namespace oosl{
 				node,
 			};
 
+			enum class output_writer_key_type{
+				nil,
+				error,
+			};
+
 			virtual ~controller();
 
 			virtual bool exiting() = 0;
@@ -99,9 +104,11 @@ namespace oosl{
 
 			virtual void on_exception_pop() = 0;
 
-			virtual output_writer_type &output_writer() = 0;
+			virtual output_writer_type &output_writer(output_writer_key_type type) = 0;
 
-			virtual output_writer_type &error_output_writer() = 0;
+			virtual void output_writer(output_writer_key_type type, output_writer_type &value) = 0;
+
+			virtual void restore_output_writer(output_writer_key_type type) = 0;
 
 			virtual memory_manager_type &memory() = 0;
 

@@ -124,7 +124,31 @@ oosl::type::primitive::primitive(id_type id)
 oosl::type::primitive::~primitive() = default;
 
 oosl::type::object::driver_type *oosl::type::primitive::driver(){
-	return nullptr;
+	switch (id_){
+	case id_type::void_:
+		break;
+	case id_type::bool_:
+		return controller_type::active->find_driver(driver_key_type::boolean);
+	case id_type::byte_:
+		return controller_type::active->find_driver(driver_key_type::byte);
+	case id_type::char_:
+	case id_type::wchar_:
+		return controller_type::active->find_driver(driver_key_type::char_);
+	case id_type::nullptr_:
+		return controller_type::active->find_driver(driver_key_type::pointer);
+	case id_type::type_:
+		break;
+	case id_type::node_:
+		break;
+	case id_type::storage_:
+		break;
+	case id_type::nan_:
+		return controller_type::active->find_driver(driver_key_type::numeric);
+	default:
+		break;
+	}
+
+	throw error_type::driver_not_found;
 }
 
 std::string oosl::type::primitive::name(){

@@ -6,7 +6,7 @@ oosl::type::pointer::pointer(ptr_type underlying_type)
 oosl::type::pointer::~pointer() = default;
 
 oosl::type::object::driver_type *oosl::type::pointer::driver(){
-	return nullptr;//#TODO: Implement
+	return controller_type::active->find_driver(driver_key_type::pointer);
 }
 
 oosl::type::object *oosl::type::pointer::underlying_type(){

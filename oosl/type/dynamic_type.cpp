@@ -6,7 +6,7 @@ oosl::type::dynamic::dynamic(id_type id)
 oosl::type::dynamic::~dynamic() = default;
 
 oosl::type::object::driver_type *oosl::type::dynamic::driver(){
-	return nullptr;//#TODO: Implement
+	return controller_type::active->find_driver(driver_key_type::dynamic);
 }
 
 int oosl::type::dynamic::score(object &type){

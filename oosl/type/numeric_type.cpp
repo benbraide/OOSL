@@ -5,6 +5,10 @@ oosl::type::numeric::numeric(id_type id)
 
 oosl::type::numeric::~numeric() = default;
 
+oosl::type::object::driver_type *oosl::type::numeric::driver(){
+	return controller_type::active->find_driver(driver_key_type::numeric);
+}
+
 int oosl::type::numeric::score(object &type){
 	auto value = primitive::score(type);
 	if (value != OOSL_MIN_TYPE_SCORE)

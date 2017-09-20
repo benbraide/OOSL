@@ -13,6 +13,8 @@ namespace oosl{
 
 			virtual ~numeric();
 
+			virtual driver_type *driver() override;
+
 			virtual int score(object &type) override;
 
 			virtual bool is_numeric() override;

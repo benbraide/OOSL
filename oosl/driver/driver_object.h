@@ -30,6 +30,7 @@ namespace oosl{
 
 			typedef common::controller controller_type;
 			typedef controller_type::static_value_type static_value_type;
+			typedef controller_type::output_writer_key_type output_writer_key_type;
 
 			typedef common::operator_id operator_id_type;
 			typedef common::unary_operator_info unary_operator_info_type;

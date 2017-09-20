@@ -37,6 +37,7 @@ namespace oosl{
 			typedef std::unordered_map<type_id_type, type_object_ptr_type> type_object_ptr_list_type;
 			typedef std::unordered_map<static_value_type, storage_entry_type *> static_value_list_type;
 			typedef std::unordered_map<driver_type, std::shared_ptr<driver_object_type>> driver_object_list_type;
+			typedef std::unordered_map<output_writer_key_type, output_writer_type *> output_writer_list_type;
 
 			controller_impl();
 
@@ -52,9 +53,11 @@ namespace oosl{
 
 			virtual void on_exception_pop() override;
 
-			virtual output_writer_type &output_writer() override;
+			virtual output_writer_type &output_writer(output_writer_key_type type) override;
 
-			virtual output_writer_type &error_output_writer() override;
+			virtual void output_writer(output_writer_key_type type, output_writer_type &value) override;
+
+			virtual void restore_output_writer(output_writer_key_type type) override;
 
 			virtual memory_manager_type &memory() override;
 
@@ -79,6 +82,7 @@ namespace oosl{
 			type_object_ptr_list_type type_list_;
 			static_value_list_type static_value_list_;
 			driver_object_list_type driver_list_;
+			output_writer_list_type output_writer_list_;
 		};
 	}
 }

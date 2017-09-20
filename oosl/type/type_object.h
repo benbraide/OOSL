@@ -32,6 +32,7 @@ namespace oosl{
 
 			typedef common::error_codes error_type;
 			typedef common::controller controller_type;
+			typedef controller_type::driver_type driver_key_type;
 
 			typedef storage::entry storage_entry_type;
 			typedef driver::object driver_type;

@@ -186,7 +186,7 @@ bool oosl::driver::object::is_void(entry_type &entry){
 }
 
 void oosl::driver::object::echo(entry_type &entry){
-	echo(entry, common::controller::active->output_writer());
+	echo(entry, common::controller::active->output_writer(output_writer_key_type::nil));
 }
 
 void oosl::driver::object::echo(entry_type &entry, output_writer_type &writer){

@@ -22,6 +22,8 @@ namespace oosl{
 			integer_required,
 			unhandled_operator,
 			not_implemented,
+			driver_not_found,
+			writer_not_found,
 		};
 	}
 }

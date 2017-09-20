@@ -11,6 +11,7 @@ namespace oosl{
 		class output_stream_writer : public output_batch_writer{
 		public:
 			typedef stream_type stream_type;
+			typedef wide_stream_type wide_stream_type;
 
 			output_stream_writer(stream_type &stream, wide_stream_type &wide_stream)
 				: stream_(stream), wide_stream_(wide_stream){}
