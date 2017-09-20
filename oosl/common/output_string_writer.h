@@ -20,17 +20,17 @@ namespace oosl{
 
 			virtual void write(const char *value, write_option_type options = write_option_type::nil) override{
 				if (OOSL_IS(options, write_option_type::char_value)){
-					wide_string_ += "'";
-					wide_string_ += value;
-					wide_string_ += "'";
+					string_ += "'";
+					string_ += value;
+					string_ += "'";
 				}
 				else if (OOSL_IS(options, write_option_type::string_value)){
-					wide_string_ += "\"";
-					wide_string_ += value;
-					wide_string_ += "\"";
+					string_ += "\"";
+					string_ += value;
+					string_ += "\"";
 				}
 				else//No quotes
-					wide_string_ += value;
+					string_ += value;
 			}
 
 			virtual void write(const wchar_t *value, write_option_type options = write_option_type::nil) override{

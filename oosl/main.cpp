@@ -3,13 +3,9 @@
 #include "test/test_runner.h"
 #include "test/test_memory_manager.h"
 #include "test/test_type_converter.h"
+#include "test/test_drivers.h"
 
 int main(){
-	std::vector<std::string> test_list({
-		"memory manager test",
-		"type converter test"
-	});
-
 	typedef oosl::common::interactive<std::string> interactive_type;
 	interactive_type io;
 	{//Hook callbacks and run
@@ -34,13 +30,13 @@ int main(){
 			return value;
 		});
 
-		io.hook<interactive_type::action_callback_type>(interactive_type::index_type::action, [&test_list](const std::string &value) -> interactive_type::action_result_type{
+		io.hook<interactive_type::action_callback_type>(interactive_type::index_type::action, [](const std::string &value) -> interactive_type::action_result_type{
 			if (value == "quit")
 				return interactive_type::action_result_type::quit;
 
 			if (value == "ls"){//List tests
 				std::string ls;
-				for (auto &item : test_list)
+				for (auto &item : oosl_test_list)
 					ls += (item + "\n");
 
 				std::cout << ls;

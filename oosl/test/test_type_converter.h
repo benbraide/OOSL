@@ -6,6 +6,8 @@
 #include "test_include.h"
 #include "../type/type_converter.h"
 
+OOSL_ADD_TEST(type_converter_test, "type converter test");
+
 DOCTEST_TEST_CASE("type converter test"){
 	__int64 int_value = 108;
 	float float_value = 4.5f;

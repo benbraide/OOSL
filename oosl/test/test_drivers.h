@@ -8,6 +8,8 @@
 #include "../common/output_string_writer.h"
 #include "../common/controller_impl.h"
 
+OOSL_ADD_TEST(drivers_test, "drivers test");
+
 DOCTEST_TEST_CASE("drivers test"){
 	oosl::common::controller_impl controller_impl_instance;
 	oosl::storage::temporary temp;
@@ -23,7 +25,12 @@ DOCTEST_TEST_CASE("drivers test"){
 		auto false_value = controller_impl_instance.find_static_value(oosl::common::controller::static_value_type::false_);
 		auto true_value = controller_impl_instance.find_static_value(oosl::common::controller::static_value_type::true_);
 
-		
+		false_value->type->driver()->echo(*false_value);
+		DOCTEST_CHECK(output_buffer == "false");
+
+		output_buffer.clear();
+		true_value->type->driver()->echo(*true_value);
+		DOCTEST_CHECK(output_buffer == "true");
 	}
 
 	DOCTEST_SUBCASE("numeric driver test"){

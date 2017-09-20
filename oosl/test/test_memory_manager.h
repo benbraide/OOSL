@@ -6,6 +6,8 @@
 #include "test_include.h"
 #include "../memory/memory_manager.h"
 
+OOSL_ADD_TEST(memory_manager_test, "memory manager test");
+
 DOCTEST_TEST_CASE("memory manager test"){
 	static const oosl::memory::manager::uint64_type protected_region = 1024ull;
 	oosl::memory::manager manager(protected_region);
