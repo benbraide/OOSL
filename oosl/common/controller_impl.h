@@ -17,6 +17,14 @@
 #include "../driver/pointer_driver.h"
 #include "../driver/dynamic_driver.h"
 
+#include "../type/any_type.h"
+#include "../type/numeric_type.h"
+#include "../type/pointer_type.h"
+#include "../type/static_array.h"
+#include "../type/variant_type.h"
+#include "../type/function_type.h"
+#include "../type/modified_type.h"
+
 #include "../storage/named_storage.h"
 
 namespace oosl{
@@ -28,7 +36,7 @@ namespace oosl{
 
 			typedef std::unordered_map<type_id_type, type_object_ptr_type> type_object_ptr_list_type;
 			typedef std::unordered_map<static_value_type, storage_entry_type *> static_value_list_type;
-			typedef std::unordered_map<driver_type, driver_object_type> driver_object_list_type;
+			typedef std::unordered_map<driver_type, std::shared_ptr<driver_object_type>> driver_object_list_type;
 
 			controller_impl();
 

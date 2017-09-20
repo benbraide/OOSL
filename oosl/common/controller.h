@@ -40,6 +40,8 @@ namespace oosl{
 
 		class controller{
 		public:
+			typedef unsigned __int64 uint64_type;
+
 			typedef interpreter_info interpreter_info_type;
 			typedef runtime_info runtime_info_type;
 			typedef output_writer output_writer_type;
@@ -74,6 +76,7 @@ namespace oosl{
 				byte,
 				char_,
 				numeric,
+				string,
 				array_,
 				pointer,
 				ref,
@@ -105,8 +108,6 @@ namespace oosl{
 			virtual storage_object_type &global_storage() = 0;
 
 			virtual temporary_storage_type &temporary_storage() = 0;
-
-			virtual void set_temporary_storage(temporary_storage_type &value) = 0;
 
 			virtual type_object_ptr_type find_type(type_id_type id) = 0;
 

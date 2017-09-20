@@ -6,6 +6,40 @@ oosl::common::controller_impl::controller_impl()
 		active = this;
 	else//Multiple controller instances
 		throw error_codes::nil;
+
+	type_list_[type_id_type::any_] = std::make_shared<oosl::type::any>();
+	type_list_[type_id_type::auto_] = std::make_shared<oosl::type::primitive>(type_id_type::auto_);
+	type_list_[type_id_type::nan_] = std::make_shared<oosl::type::primitive>(type_id_type::nan_);
+
+	for (auto id = type_id_type::void_; id <= type_id_type::wchar_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
+		type_list_[id] = std::make_shared<oosl::type::primitive>(id);//Add range
+
+	for (auto id = type_id_type::string_; id <= type_id_type::wstring_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
+		type_list_[id] = std::make_shared<oosl::type::primitive>(id);//Add range
+
+	for (auto id = type_id_type::nullptr_; id <= type_id_type::runtime_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
+		type_list_[id] = std::make_shared<oosl::type::primitive>(id);//Add range
+
+	for (auto id = type_id_type::int8_; id <= type_id_type::ldouble; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
+		type_list_[id] = std::make_shared<oosl::type::numeric>(id);//Add range
+
+	for (auto id = type_id_type::array_; id <= type_id_type::function_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
+		type_list_[id] = std::make_shared<oosl::type::dynamic>(id);//Add range
+
+	static_value_list_[static_value_type::false_] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::false_);
+	static_value_list_[static_value_type::true_] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::true_);
+	static_value_list_[static_value_type::indeterminate] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::indeterminate);
+
+	static_value_list_[static_value_type::nullptr_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nullptr_]);
+	static_value_list_[static_value_type::nan_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nan_]);
+
+	driver_list_[driver_type::boolean] = std::make_shared<oosl::driver::boolean>();
+	driver_list_[driver_type::byte] = std::make_shared<oosl::driver::byte>();
+	driver_list_[driver_type::char_] = std::make_shared<oosl::driver::char_driver>();
+	driver_list_[driver_type::numeric] = std::make_shared<oosl::driver::numeric>();
+	driver_list_[driver_type::string] = std::make_shared<oosl::driver::string_driver>();
+	driver_list_[driver_type::pointer] = std::make_shared<oosl::driver::pointer>();
+	driver_list_[driver_type::dynamic] = std::make_shared<oosl::driver::dynamic_driver>();
 }
 
 oosl::common::controller_impl::~controller_impl(){
@@ -64,7 +98,7 @@ oosl::common::controller::storage_entry_type *oosl::common::controller_impl::fin
 
 oosl::common::controller::driver_object_type *oosl::common::controller_impl::find_driver(driver_type type){
 	auto entry = driver_list_.find(type);
-	return ((entry == driver_list_.end()) ? nullptr : &entry->second);
+	return ((entry == driver_list_.end()) ? nullptr : entry->second.get());
 }
 
 thread_local oosl::common::controller::runtime_info_type oosl::common::controller_impl::runtime_info_{};
