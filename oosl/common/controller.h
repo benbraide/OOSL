@@ -96,6 +96,8 @@ namespace oosl{
 
 			virtual bool exiting() = 0;
 
+			virtual bool initializing() = 0;
+
 			virtual interpreter_info_type &interpreter_info() = 0;
 
 			virtual runtime_info_type &runtime_info() = 0;

@@ -23,6 +23,7 @@ namespace oosl{
 
 			typedef oosl::type::bool_type bool_type;
 			typedef oosl::type::object::ptr_type type_ptr_type;
+			typedef oosl::type::id type_id_type;
 
 			typedef std::list<entry_type> entry_list_type;
 			typedef oosl::memory::block::attribute_type memory_attribute_type;
@@ -40,6 +41,20 @@ namespace oosl{
 
 			template <typename value_type>
 			entry_type *add_scalar(value_type value, type_ptr_type type = nullptr){
+				return add_scalar_(value, type);
+			}
+
+			entry_type *add_scalar(bool_type value);
+
+			entry_type *add_scalar(const std::string &value);
+
+			entry_type *add_scalar(const std::wstring &value);
+
+			entry_type *wrap(uint64_type address, type_ptr_type type, entry_attribute_type attributes = entry_attribute_type::nil);
+
+		protected:
+			template <typename value_type>
+			entry_type *add_scalar_(value_type value, type_ptr_type type){
 				auto block = common::controller::active->memory().allocate_scalar(value);
 				if (type == nullptr)//Find type
 					type = common::controller::active->find_type(oosl::type::mapper<value_type>::id);
@@ -52,15 +67,6 @@ namespace oosl{
 				});
 			}
 
-			entry_type *add_scalar(bool_type value);
-
-			entry_type *add_scalar(const std::string &value);
-
-			entry_type *add_scalar(const std::wstring &value);
-
-			entry_type *wrap(uint64_type address, type_ptr_type type, entry_attribute_type attributes = entry_attribute_type::nil);
-
-		protected:
 			template <typename string_type>
 			entry_type *add_string_scalar_(const string_type &value, type_ptr_type type){
 				typedef typename string_type::traits_type::char_type char_type;

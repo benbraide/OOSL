@@ -39,11 +39,19 @@ namespace oosl{
 			typedef std::unordered_map<driver_type, std::shared_ptr<driver_object_type>> driver_object_list_type;
 			typedef std::unordered_map<output_writer_key_type, output_writer_type *> output_writer_list_type;
 
+			enum class state_type : unsigned int{
+				nil					= (0 << 0x0000),
+				exiting				= (1 << 0x0000),
+				initializing		= (1 << 0x0001),
+			};
+
 			controller_impl();
 
 			virtual ~controller_impl();
 
 			virtual bool exiting() override;
+
+			virtual bool initializing() override;
 
 			virtual interpreter_info_type &interpreter_info() override;
 
@@ -71,9 +79,12 @@ namespace oosl{
 
 			virtual driver_object_type *find_driver(driver_type type) override;
 
+			virtual void exit();
+
 		protected:
 			static thread_local runtime_info_type runtime_info_;
 
+			state_type states_;
 			memory_manager_type memory_manager_;
 			temporary_storage_type internal_temporary_storage_;
 			named_storage_type global_storage_;
@@ -84,6 +95,8 @@ namespace oosl{
 			driver_object_list_type driver_list_;
 			output_writer_list_type output_writer_list_;
 		};
+
+		OOSL_MAKE_OPERATORS(controller_impl::state_type);
 	}
 }
 

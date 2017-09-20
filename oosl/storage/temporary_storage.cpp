@@ -12,6 +12,9 @@ oosl::storage::temporary::~temporary(){
 }
 
 oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(bool_type value){
+	if (common::controller::active->initializing())//Controller is initializing
+		return add_scalar_(value, common::controller::active->find_type(type_id_type::bool_));
+
 	switch (value){
 	case bool_type::false_:
 		return common::controller::active->find_static_value(common::controller::static_value_type::false_);

@@ -1,7 +1,7 @@
 #include "controller_impl.h"
 
 oosl::common::controller_impl::controller_impl()
-	: global_storage_(""), output_stream_writer_(std::cout, std::wcout), error_output_stream_writer_(std::cerr, std::wcerr){
+	: states_(state_type::initializing), global_storage_(""), output_stream_writer_(std::cout, std::wcout), error_output_stream_writer_(std::cerr, std::wcerr){
 	if (active == nullptr)
 		active = this;
 	else//Multiple controller instances
@@ -26,13 +26,6 @@ oosl::common::controller_impl::controller_impl()
 	for (auto id = type_id_type::array_; id <= type_id_type::function_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
 		type_list_[id] = std::make_shared<oosl::type::dynamic>(id);//Add range
 
-	static_value_list_[static_value_type::false_] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::false_);
-	static_value_list_[static_value_type::true_] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::true_);
-	static_value_list_[static_value_type::indeterminate] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::indeterminate);
-
-	static_value_list_[static_value_type::nullptr_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nullptr_]);
-	static_value_list_[static_value_type::nan_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nan_]);
-
 	driver_list_[driver_type::boolean] = std::make_shared<oosl::driver::boolean>();
 	driver_list_[driver_type::byte] = std::make_shared<oosl::driver::byte>();
 	driver_list_[driver_type::char_] = std::make_shared<oosl::driver::char_driver>();
@@ -43,6 +36,15 @@ oosl::common::controller_impl::controller_impl()
 
 	output_writer_list_[output_writer_key_type::nil] = &output_stream_writer_;
 	output_writer_list_[output_writer_key_type::error] = &error_output_stream_writer_;
+
+	static_value_list_[static_value_type::false_] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::false_);
+	static_value_list_[static_value_type::true_] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::true_);
+	static_value_list_[static_value_type::indeterminate] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::indeterminate);
+
+	static_value_list_[static_value_type::nullptr_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nullptr_]);
+	static_value_list_[static_value_type::nan_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nan_]);
+
+	OOSL_REMOVE(states_, state_type::initializing);
 }
 
 oosl::common::controller_impl::~controller_impl(){
@@ -50,7 +52,11 @@ oosl::common::controller_impl::~controller_impl(){
 }
 
 bool oosl::common::controller_impl::exiting(){
-	throw error_codes::not_implemented;
+	return OOSL_IS(states_, state_type::exiting);
+}
+
+bool oosl::common::controller_impl::initializing(){
+	return OOSL_IS(states_, state_type::initializing);
 }
 
 oosl::common::controller::interpreter_info_type &oosl::common::controller_impl::interpreter_info(){
@@ -122,6 +128,11 @@ oosl::common::controller::driver_object_type *oosl::common::controller_impl::fin
 		throw error_codes::driver_not_found;
 
 	return entry->second.get();
+}
+
+void oosl::common::controller_impl::exit(){
+	OOSL_SET(states_, state_type::exiting);
+	memory_manager_.tear();
 }
 
 thread_local oosl::common::controller::runtime_info_type oosl::common::controller_impl::runtime_info_{};
