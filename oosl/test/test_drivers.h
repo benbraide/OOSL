@@ -11,6 +11,7 @@
 OOSL_ADD_TEST(drivers_test, "drivers test");
 
 DOCTEST_TEST_CASE("drivers test"){
+	oosl::common::controller::active = nullptr;
 	oosl::common::controller_impl controller_impl_instance;
 	oosl::storage::temporary temp;
 
@@ -31,6 +32,34 @@ DOCTEST_TEST_CASE("drivers test"){
 		output_buffer.clear();
 		true_value->type->driver()->echo(*true_value);
 		DOCTEST_CHECK(output_buffer == "true");
+
+		oosl::common::unary_operator_info unary_info{ true, oosl::common::operator_id::relational_not };
+		oosl::common::binary_operator_info binary_info{ oosl::common::operator_id::equality };
+		output_buffer.clear();
+
+		auto result = false_value->type->driver()->evaluate(*false_value, unary_info);
+		result->type->driver()->echo(*result);
+		DOCTEST_CHECK(output_buffer == "true");
+
+		output_buffer.clear();
+		result = true_value->type->driver()->evaluate(*true_value, unary_info);
+
+		result->type->driver()->echo(*result);
+		DOCTEST_CHECK(output_buffer == "false");
+
+		output_buffer.clear();
+		result = false_value->type->driver()->evaluate(*false_value, binary_info, *true_value);
+
+		result->type->driver()->echo(*result);
+		DOCTEST_CHECK(output_buffer == "false");
+
+		binary_info.id = oosl::common::operator_id::inverse_equality;
+		output_buffer.clear();
+		result = false_value->type->driver()->evaluate(*false_value, binary_info, *true_value);
+
+		result->type->driver()->echo(*result);
+		DOCTEST_CHECK(output_buffer == "true");
+		DOCTEST_CHECK(result->type->driver()->value<oosl::type::bool_type>(*result) == oosl::type::bool_type::true_);
 	}
 
 	DOCTEST_SUBCASE("numeric driver test"){

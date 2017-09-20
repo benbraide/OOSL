@@ -48,7 +48,7 @@ oosl::common::controller_impl::controller_impl()
 }
 
 oosl::common::controller_impl::~controller_impl(){
-
+	
 }
 
 bool oosl::common::controller_impl::exiting(){

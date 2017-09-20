@@ -14,10 +14,9 @@ void oosl::driver::boolean::echo(entry_type &entry, output_writer_type &writer){
 		writer.write("true");
 		break;
 	default:
+		throw error_type::not_implemented;
 		break;
 	}
-
-	throw error_type::not_implemented;
 }
 
 void oosl::driver::boolean::value(entry_type &entry, type_id_type to, char *destination){
