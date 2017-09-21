@@ -52,6 +52,7 @@ oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry,
 void oosl::driver::numeric::echo(entry_type &entry, output_writer_type &writer){
 	std::string target;
 	value(entry, type_id_type::string_, reinterpret_cast<char *>(&target));
+	target += suffix_(entry);
 	writer.write(target.c_str());
 }
 
@@ -191,6 +192,39 @@ oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &e
 	}
 
 	return object::evaluate_(entry, operator_info, operand);
+}
+
+std::string oosl::driver::numeric::suffix_(entry_type &entry){
+	switch (entry.type->id()){
+	case type_id_type::int8_:
+		return "i8";
+	case type_id_type::uint8_:
+		return "ui8";
+	case type_id_type::int16_:
+		return "i16";
+	case type_id_type::uint16_:
+		return "ui16";
+	case type_id_type::int32_:
+		return "i32";
+	case type_id_type::uint32_:
+		return "ui32";
+	case type_id_type::int64_:
+		return "i64";
+	case type_id_type::uint64_:
+		return "ui64";
+	case type_id_type::int128_:
+		return "i128";
+	case type_id_type::uint128_:
+		return "ui128";
+	case type_id_type::float_:
+		return "f";
+	case type_id_type::ldouble:
+		return "l";
+	default:
+		break;
+	}
+
+	return "";
 }
 
 bool oosl::driver::numeric::is_(evaluation_option_type left, evaluation_option_type right){

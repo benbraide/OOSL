@@ -40,6 +40,7 @@ namespace oosl{
 			typedef entry_type::attribute_type attribute_type;
 
 			typedef std::size_t size_type;
+			typedef unsigned __int8 uint8_type;
 			typedef unsigned __int64 uint64_type;
 
 			enum class cast_option_type : unsigned int{
@@ -179,7 +180,7 @@ namespace oosl{
 				if (!OOSL_IS(options, post_evaluation_type::assign)){//Temporary value
 					if (!OOSL_IS(options, post_evaluation_type::byte))
 						return oosl::common::controller::active->temporary_storage().add_scalar(value);
-					return oosl::common::controller::active->temporary_storage().add_scalar(value, oosl::common::controller::active->find_type(type_id_type::byte_));
+					return oosl::common::controller::active->temporary_storage().add_scalar(static_cast<uint8_type>(value), oosl::common::controller::active->find_type(type_id_type::byte_));
 				}
 
 				if (!is_lval(entry))
@@ -193,7 +194,7 @@ namespace oosl{
 				if (OOSL_IS(options, post_evaluation_type::value_return)){//Return value
 					if (!OOSL_IS(options, post_evaluation_type::byte))
 						return oosl::common::controller::active->temporary_storage().add_scalar(value, entry.type);
-					return oosl::common::controller::active->temporary_storage().add_scalar(value, oosl::common::controller::active->find_type(type_id_type::byte_));
+					return oosl::common::controller::active->temporary_storage().add_scalar(static_cast<uint8_type>(value), oosl::common::controller::active->find_type(type_id_type::byte_));
 				}
 
 				return &entry;

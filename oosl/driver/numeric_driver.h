@@ -227,6 +227,8 @@ namespace oosl{
 				return evaluate_signed_<target_type>(entry, operator_id, left);
 			}
 
+			std::string suffix_(entry_type &entry);
+
 			static bool is_(evaluation_option_type left, evaluation_option_type right);
 		};
 

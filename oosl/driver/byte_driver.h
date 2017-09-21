@@ -9,8 +9,6 @@ namespace oosl{
 	namespace driver{
 		class byte : public object{
 		public:
-			typedef unsigned __int8 uint8_type;
-
 			using object::echo;
 			using object::value;
 
