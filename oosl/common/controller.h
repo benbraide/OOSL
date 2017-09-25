@@ -196,7 +196,7 @@ namespace oosl{
 
 			template <typename string_type, typename value_type>
 			static string_type real_to_string(value_type value){
-				typedef char_type typename string_type::traits_type::char_type;
+				typedef typename string_type::traits_type::char_type char_type;
 
 				auto string_value = to_string<string_type>(value);
 				auto index = string_value.size();
@@ -213,12 +213,12 @@ namespace oosl{
 			}
 
 			template <typename string_type, typename value_type>
-			std::enable_if_t<std::is_same_v<string_type, std::string>, string_type> to_string(value_type value){
+			static std::enable_if_t<std::is_same_v<string_type, std::string>, string_type> to_string(value_type value){
 				return std::to_string(value);
 			}
 
 			template <typename string_type, typename value_type>
-			std::enable_if_t<std::is_same_v<string_type, std::wstring>, string_type> to_string(value_type value){
+			static std::enable_if_t<std::is_same_v<string_type, std::wstring>, string_type> to_string(value_type value){
 				return std::to_wstring(value);
 			}
 

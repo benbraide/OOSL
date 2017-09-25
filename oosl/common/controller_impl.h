@@ -82,6 +82,7 @@ namespace oosl{
 			virtual void exit();
 
 		protected:
+			static thread_local interpreter_info_type interpreter_info_;
 			static thread_local runtime_info_type runtime_info_;
 
 			state_type states_;

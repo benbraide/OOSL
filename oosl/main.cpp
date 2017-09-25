@@ -5,7 +5,27 @@
 #include "test/test_type_converter.h"
 #include "test/test_drivers.h"
 
+#include "lexer/literal_grammar.h"
+
 int main(){
+	oosl::lexer::skipper skipper;
+	oosl::lexer::numeric_literal_grammar gram;
+
+	std::vector<OOSL_AST_QNAME(num)> ast_list;
+	std::vector<oosl::node::object::ptr_type> node_list;
+
+	std::string buffer;
+	std::getline(std::cin, buffer);
+
+	auto pv = boost::spirit::qi::phrase_parse(buffer.c_str(), buffer.c_str() + buffer.size(), gram >> *gram, skipper, ast_list);
+	if (pv){
+		for (auto &num : ast_list)//Convert to node
+			node_list.push_back(oosl::lexer::apply_visitor<OOSL_AST_JOIN(OOSL_AST_QNAME(num), _visitor)>(num.num, num));
+
+		for (auto nod : node_list)
+			std::cout << nod->print() << std::endl;
+	}
+
 	typedef oosl::common::interactive<std::string> interactive_type;
 	interactive_type io;
 	{//Hook callbacks and run

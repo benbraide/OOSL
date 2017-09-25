@@ -60,10 +60,15 @@ namespace oosl{
 			typedef inplace_target_type target_type;
 
 			typedef std::function<bool(inplace &, target_type, void *)> callback_type;
+			typedef std::function<bool(target_type, void *)> alt_callback_type;
 
 			template <typename... args_type>
 			inplace(id_type id, const index_type &index, callback_type callback, args_type &&... args)
 				: base_type(index), inplace_value_type(std::forward<args_type>(args)...), id_(id), callback_(callback){}
+
+			template <typename... args_type>
+			inplace(id_type id, const index_type &index, alt_callback_type callback, args_type &&... args)
+				: inplace(id, index, [callback](inplace &, target_type target, void *out){ return callback(target, out); }, std::forward<args_type>(args)...){}
 
 			virtual ~inplace(){
 				callback_(*this, target_type::destruct, nullptr);
