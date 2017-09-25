@@ -44,6 +44,25 @@ namespace oosl{
 		private:
 			callback_type uninit_;
 		};
+
+		template <class target_type, class value_type = target_type>
+		class raii_state : public value_raii_base<value_type>{
+		public:
+			typedef target_type target_type;
+			typedef value_raii_base<value_type> base_type;
+
+			raii_state(target_type &target, const value_type &value)
+				: base_type(target), target_(&target){
+				target = value;//Set value
+			}
+
+			~raii_state(){
+				*target_ = base_type::value_;//Restore value
+			}
+
+		protected:
+			target_type *target_;
+		};
 	}
 }
 
