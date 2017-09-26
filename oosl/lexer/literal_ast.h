@@ -20,6 +20,11 @@ struct OOSL_AST_NAME(name){						\
 	std::string value;							\
 };
 
+#define OOSL_DEFINE_STRING_SEQUENCE_STRUCT(name)\
+struct OOSL_AST_NAME(OOSL_AST_JOIN(name, _sequence)){\
+	std::vector<OOSL_AST_NAME(name)> value;		\
+};
+
 #define OOSL_ADAPT_NUMERIC_STRUCT(name, type)	\
 BOOST_FUSION_ADAPT_STRUCT(						\
 	OOSL_AST_QNAME(name),						\
@@ -31,6 +36,12 @@ BOOST_FUSION_ADAPT_STRUCT(						\
 	OOSL_AST_QNAME(name),						\
 	(boost::optional<oosl::lexer::string_prefix_type>, pref)\
 	(std::string, value)						\
+)
+
+#define OOSL_ADAPT_STRING_SEQUENCE_STRUCT(name)	\
+BOOST_FUSION_ADAPT_STRUCT(						\
+	OOSL_AST_QNAME(OOSL_AST_JOIN(name, _sequence)),\
+	(std::vector<OOSL_AST_QNAME(name)>, value)	\
 )
 
 namespace oosl{
@@ -179,6 +190,9 @@ namespace oosl{
 		OOSL_DEFINE_STRING_STRUCT(character);
 		OOSL_DEFINE_STRING_STRUCT(string);
 		OOSL_DEFINE_STRING_STRUCT(raw);
+
+		OOSL_DEFINE_STRING_SEQUENCE_STRUCT(string);
+		OOSL_DEFINE_STRING_SEQUENCE_STRUCT(raw);
 	}
 }
 
@@ -200,5 +214,8 @@ BOOST_FUSION_ADAPT_STRUCT(
 OOSL_ADAPT_STRING_STRUCT(character);
 OOSL_ADAPT_STRING_STRUCT(string);
 OOSL_ADAPT_STRING_STRUCT(raw);
+
+OOSL_ADAPT_STRING_SEQUENCE_STRUCT(string);
+OOSL_ADAPT_STRING_SEQUENCE_STRUCT(raw);
 
 #endif /* !OOSL_LITERAL_AST_H */

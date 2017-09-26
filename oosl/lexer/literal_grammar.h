@@ -49,7 +49,8 @@ namespace oosl{
 			typedef boost::spirit::qi::symbols<char, string_prefix_type> prefix_symbols_type;
 			typedef boost::spirit::qi::symbols<char, char> escape_symbols_type;
 
-			quote_literal_grammar(){
+			quote_literal_grammar()
+				: quote_literal_grammar::base_type(start_, "OOSL_QUOTE_LITERAL"){
 				using namespace boost::spirit;
 
 				non_escaped_	%= qi::lexeme['@' >> -prefix_symbols_ >> quote >> qi::as_string[*(~qi::char_(quote))] >> quote];
@@ -82,9 +83,32 @@ namespace oosl{
 			escape_symbols_type escape_symbols_;
 		};
 
+		template <class quote_ast_type, class ast_type, char quote>
+		class quote_literal_sequence_grammar : public boost::spirit::qi::grammar<const char *, ast_type(), skipper>{
+		public:
+			typedef const char *iterator_type;
+
+			typedef quote_literal_grammar<quote_ast_type, quote> quote_literal_grammar_type;
+			typedef boost::spirit::qi::rule<iterator_type, ast_type(), skipper> quote_rule_type;
+
+			quote_literal_sequence_grammar()
+				: quote_literal_sequence_grammar::base_type(start_, "OOSL_QUOTE_LITERAL_SEQUENCE"){
+				using namespace boost::spirit;
+
+				start_ %= quote_literal_grammar_ >> *quote_literal_grammar_;
+			}
+
+		protected:
+			quote_rule_type start_;
+			quote_literal_grammar_type quote_literal_grammar_;
+		};
+
 		using character_literal_grammar = quote_literal_grammar<OOSL_AST_NAME(character), '\''>;
 		using string_literal_grammar = quote_literal_grammar<OOSL_AST_NAME(string), '\"'>;
 		using raw_literal_grammar = quote_literal_grammar<OOSL_AST_NAME(raw), '`'>;
+
+		using string_literal_sequence_grammar = quote_literal_sequence_grammar<OOSL_AST_NAME(string), OOSL_AST_NAME(OOSL_AST_JOIN(string, _sequence)), '\"'>;
+		using raw_literal_sequence_grammar = quote_literal_sequence_grammar<OOSL_AST_NAME(raw), OOSL_AST_NAME(OOSL_AST_JOIN(raw, _sequence)), '`'>;
 	}
 }
 
