@@ -39,6 +39,52 @@ namespace oosl{
 
 			suffix_symbols_type suffix_symbols_;
 		};
+
+		template <class ast_type, char quote>
+		class quote_literal_grammar : public boost::spirit::qi::grammar<const char *, ast_type(), skipper>{
+		public:
+			typedef const char *iterator_type;
+
+			typedef boost::spirit::qi::rule<iterator_type, ast_type(), skipper> quote_rule_type;
+			typedef boost::spirit::qi::symbols<char, string_prefix_type> prefix_symbols_type;
+			typedef boost::spirit::qi::symbols<char, char> escape_symbols_type;
+
+			quote_literal_grammar(){
+				using namespace boost::spirit;
+
+				non_escaped_	%= qi::lexeme['@' >> -prefix_symbols_ >> quote >> qi::as_string[*(~qi::char_(quote))] >> quote];
+				start_			%= non_escaped_ | qi::lexeme[-prefix_symbols_ >> quote >> qi::as_string[*(escape_symbols_ | ~qi::char_(quote))] >> quote];
+
+				prefix_symbols_.add
+					("L", string_prefix_type::wide);
+
+				escape_symbols_.add
+					("\\0", '\0')
+					("\\a", '\a')
+					("\\b", '\b')
+					("\\f", '\f')
+					("\\n", '\n')
+					("\\r", '\r')
+					("\\t", '\t')
+					("\\v", '\v')
+					("\\?", '\?')
+					("\\\"", '\"')
+					("\\\'", '\'')
+					("\\`", '`')
+					("\\\\", '\\');
+			}
+
+		protected:
+			quote_rule_type start_;
+			quote_rule_type non_escaped_;
+
+			prefix_symbols_type prefix_symbols_;
+			escape_symbols_type escape_symbols_;
+		};
+
+		using character_literal_grammar = quote_literal_grammar<OOSL_AST_NAME(character), '\''>;
+		using string_literal_grammar = quote_literal_grammar<OOSL_AST_NAME(string), '\"'>;
+		using raw_literal_grammar = quote_literal_grammar<OOSL_AST_NAME(raw), '`'>;
 	}
 }
 

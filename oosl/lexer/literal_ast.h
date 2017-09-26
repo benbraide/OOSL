@@ -14,10 +14,23 @@ struct OOSL_AST_NAME(name){						\
 	type value;									\
 };
 
+#define OOSL_DEFINE_STRING_STRUCT(name)			\
+struct OOSL_AST_NAME(name){						\
+	boost::optional<string_prefix_type> pref;	\
+	std::string value;							\
+};
+
 #define OOSL_ADAPT_NUMERIC_STRUCT(name, type)	\
 BOOST_FUSION_ADAPT_STRUCT(						\
 	OOSL_AST_QNAME(name),						\
 	(type, value)								\
+)
+
+#define OOSL_ADAPT_STRING_STRUCT(name)			\
+BOOST_FUSION_ADAPT_STRUCT(						\
+	OOSL_AST_QNAME(name),						\
+	(boost::optional<oosl::lexer::string_prefix_type>, pref)\
+	(std::string, value)						\
 )
 
 namespace oosl{
@@ -39,12 +52,16 @@ namespace oosl{
 			f128,
 		};
 
+		enum class string_prefix_type{
+			nil,
+			wide,
+		};
+
 		OOSL_DEFINE_NUMERIC_STRUCT(integer, long long);
 		OOSL_DEFINE_NUMERIC_STRUCT(real, long double);
 
 		struct OOSL_AST_NAME(rad){
 			int base;
-			char r;
 			std::string value;
 		};
 
@@ -79,7 +96,7 @@ namespace oosl{
 
 				try{
 					converted_value = std::stoll(value.value, &index, value.base);
-					if (index >= value.value.size())
+					if (index < value.value.size())
 						throw oosl::common::error_codes::bad_integer;
 				}
 				catch (...){
@@ -158,6 +175,10 @@ namespace oosl{
 
 			OOSL_AST_NAME(num) *object_;
 		};
+
+		OOSL_DEFINE_STRING_STRUCT(character);
+		OOSL_DEFINE_STRING_STRUCT(string);
+		OOSL_DEFINE_STRING_STRUCT(raw);
 	}
 }
 
@@ -167,7 +188,6 @@ OOSL_ADAPT_NUMERIC_STRUCT(real, long double);
 BOOST_FUSION_ADAPT_STRUCT(
 	OOSL_AST_QNAME(rad),
 	(int, base)
-	(char, r)
 	(std::string, value)
 )
 
@@ -176,5 +196,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 	(OOSL_AST_QNAME(num)::num_type, num)
 	(boost::optional<oosl::lexer::numeric_suffix_type>, suff)
 )
+
+OOSL_ADAPT_STRING_STRUCT(character);
+OOSL_ADAPT_STRING_STRUCT(string);
+OOSL_ADAPT_STRING_STRUCT(raw);
 
 #endif /* !OOSL_LITERAL_AST_H */

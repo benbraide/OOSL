@@ -6,7 +6,7 @@ oosl::lexer::numeric_literal_grammar::numeric_literal_grammar()
 
 	integer_		%= qi::long_long;
 	real_			%= real_parser_;
-	rad_			%= qi::int_ >> qi::no_skip[qi::char_('r') >> qi::as_string[+qi::alnum]];
+	rad_			%= qi::lexeme[qi::int_ >> 'r' >> qi::as_string[+qi::alnum]];
 
 	start_			%= (rad_ | real_ | integer_) >> qi::no_skip[-suffix_symbols_];
 
