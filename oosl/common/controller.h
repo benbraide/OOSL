@@ -222,6 +222,16 @@ namespace oosl{
 				return std::to_wstring(value);
 			}
 
+			static std::wstring to_wstring(const std::string &value){
+				std::wstring converted_value;
+				converted_value.reserve(value.size());
+
+				for (auto c : value)
+					converted_value += c;
+
+				return converted_value;
+			}
+
 			static controller *active;
 		};
 	}

@@ -20,11 +20,6 @@ struct OOSL_AST_NAME(name){						\
 	std::string value;							\
 };
 
-#define OOSL_DEFINE_STRING_SEQUENCE_STRUCT(name)\
-struct OOSL_AST_NAME(OOSL_AST_JOIN(name, _sequence)){\
-	std::vector<OOSL_AST_NAME(name)> value;		\
-};
-
 #define OOSL_ADAPT_NUMERIC_STRUCT(name, type)	\
 BOOST_FUSION_ADAPT_STRUCT(						\
 	OOSL_AST_QNAME(name),						\
@@ -36,12 +31,6 @@ BOOST_FUSION_ADAPT_STRUCT(						\
 	OOSL_AST_QNAME(name),						\
 	(boost::optional<oosl::lexer::string_prefix_type>, pref)\
 	(std::string, value)						\
-)
-
-#define OOSL_ADAPT_STRING_SEQUENCE_STRUCT(name)	\
-BOOST_FUSION_ADAPT_STRUCT(						\
-	OOSL_AST_QNAME(OOSL_AST_JOIN(name, _sequence)),\
-	(std::vector<OOSL_AST_QNAME(name)>, value)	\
 )
 
 namespace oosl{
@@ -91,14 +80,10 @@ namespace oosl{
 			typedef oosl::node::id node_id_type;
 			typedef oosl::node::index node_index_type;
 
-			typedef oosl::node::inplace<float> f32_inplace_type;
-			typedef oosl::node::inplace<double> f64_inplace_type;
-			typedef oosl::node::inplace<long double> f128_inplace_type;
-
 			typedef oosl::node::inplace_target_type inplace_target_type;
 			typedef oosl::storage::object::entry_type entry_type;
 
-			OOSL_AST_JOIN(OOSL_AST_NAME(num), _visitor)(OOSL_AST_NAME(num) &object)
+			OOSL_AST_JOIN(OOSL_AST_NAME(num), _visitor)(const OOSL_AST_NAME(num) &object)
 				: object_(&object){}
 
 			node_ptr_type operator()(const OOSL_AST_NAME(rad) &value){
@@ -184,15 +169,115 @@ namespace oosl{
 				}, static_cast<target_value_type>(value));
 			}
 
-			OOSL_AST_NAME(num) *object_;
+			const OOSL_AST_NAME(num) *object_;
 		};
 
 		OOSL_DEFINE_STRING_STRUCT(character);
 		OOSL_DEFINE_STRING_STRUCT(string);
 		OOSL_DEFINE_STRING_STRUCT(raw);
 
-		OOSL_DEFINE_STRING_SEQUENCE_STRUCT(string);
-		OOSL_DEFINE_STRING_SEQUENCE_STRUCT(raw);
+		struct OOSL_AST_NAME(quote){
+			typedef boost::variant<
+				OOSL_AST_NAME(character),
+				OOSL_AST_NAME(string),
+				OOSL_AST_NAME(raw)
+			> quote_type;
+			quote_type quote;
+		};
+
+		struct OOSL_AST_JOIN(OOSL_AST_NAME(quote), _visitor) : public boost::static_visitor<oosl::node::object::ptr_type>{
+			typedef oosl::node::object::ptr_type node_ptr_type;
+			typedef oosl::node::id node_id_type;
+			typedef oosl::node::index node_index_type;
+
+			typedef oosl::node::inplace<std::string> inplace_type;
+			typedef oosl::node::inplace_target_type inplace_target_type;
+			typedef oosl::storage::object::entry_type entry_type;
+
+			node_ptr_type operator()(const OOSL_AST_NAME(character) &value){
+				auto is_wide = (value.pref.value_or(string_prefix_type::nil) == string_prefix_type::wide);
+				return std::make_shared<inplace_type>(node_id_type::literal_, node_index_type{}, [is_wide](inplace_type &owner, inplace_target_type target, void *out) -> bool{
+					switch (target){
+					case inplace_target_type::eval:
+						return true;
+					case inplace_target_type::print:
+						if (is_wide)
+							*reinterpret_cast<std::string *>(out) = ("L\'" + owner.value() + "\'");
+						else//Non-wide
+							*reinterpret_cast<std::string *>(out) = ("\'" + owner.value() + "\'");
+						return true;
+					default:
+						break;
+					}
+
+					return false;
+				}, value.value);
+			}
+
+			node_ptr_type operator()(const OOSL_AST_NAME(string) &value){
+				auto is_wide = (value.pref.value_or(string_prefix_type::nil) == string_prefix_type::wide);
+				return std::make_shared<inplace_type>(node_id_type::literal_, node_index_type{}, [is_wide](inplace_type &owner, inplace_target_type target, void *out) -> bool{
+					switch (target){
+					case inplace_target_type::eval:
+						if (is_wide)
+							*reinterpret_cast<entry_type **>(out) = oosl::common::controller::active->temporary_storage().add_scalar(oosl::common::controller::to_wstring(owner.value()));
+						else//Non-wide
+							*reinterpret_cast<entry_type **>(out) = oosl::common::controller::active->temporary_storage().add_scalar(owner.value());
+						return true;
+					case inplace_target_type::print:
+						if (is_wide)
+							*reinterpret_cast<std::string *>(out) = ("L\"" + owner.value() + "\"");
+						else//Non-wide
+							*reinterpret_cast<std::string *>(out) = ("\"" + owner.value() + "\"");
+						return true;
+					default:
+						break;
+					}
+
+					return false;
+				}, value.value);
+			}
+
+			node_ptr_type operator()(const OOSL_AST_NAME(raw) &value){
+				auto is_wide = (value.pref.value_or(string_prefix_type::nil) == string_prefix_type::wide);
+				return std::make_shared<inplace_type>(node_id_type::literal_, node_index_type{}, [is_wide](inplace_type &owner, inplace_target_type target, void *out) -> bool{
+					switch (target){
+					case inplace_target_type::eval:
+						return true;
+					case inplace_target_type::print:
+						if (is_wide)
+							*reinterpret_cast<std::string *>(out) = ("L`" + owner.value() + "`");
+						else//Non-wide
+							*reinterpret_cast<std::string *>(out) = ("`" + owner.value() + "`");
+						return true;
+					default:
+						break;
+					}
+
+					return false;
+				}, value.value);
+			}
+		};
+
+		struct OOSL_AST_NAME(lit){
+			typedef boost::variant<
+				OOSL_AST_NAME(num),
+				OOSL_AST_NAME(quote)
+			> lit_type;
+			lit_type lit;
+		};
+
+		struct OOSL_AST_JOIN(OOSL_AST_NAME(lit), _visitor) : public boost::static_visitor<oosl::node::object::ptr_type>{
+			typedef oosl::node::object::ptr_type node_ptr_type;
+
+			node_ptr_type operator()(const OOSL_AST_NAME(num) &value){
+				return oosl::lexer::apply_visitor<OOSL_AST_JOIN(OOSL_AST_NAME(num), _visitor)>(value.num, value);
+			}
+
+			node_ptr_type operator()(const OOSL_AST_NAME(quote) &value){
+				return oosl::lexer::apply_visitor<OOSL_AST_JOIN(OOSL_AST_NAME(quote), _visitor)>(value.quote);
+			}
+		};
 	}
 }
 
@@ -215,7 +300,14 @@ OOSL_ADAPT_STRING_STRUCT(character);
 OOSL_ADAPT_STRING_STRUCT(string);
 OOSL_ADAPT_STRING_STRUCT(raw);
 
-OOSL_ADAPT_STRING_SEQUENCE_STRUCT(string);
-OOSL_ADAPT_STRING_SEQUENCE_STRUCT(raw);
+BOOST_FUSION_ADAPT_STRUCT(
+	OOSL_AST_QNAME(quote),
+	(OOSL_AST_QNAME(quote)::quote_type, quote)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+	OOSL_AST_QNAME(lit),
+	(OOSL_AST_QNAME(lit)::lit_type, lit)
+)
 
 #endif /* !OOSL_LITERAL_AST_H */

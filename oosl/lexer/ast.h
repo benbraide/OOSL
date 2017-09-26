@@ -25,7 +25,7 @@
 namespace oosl{
 	namespace lexer{
 		template <class visitor_type, class variant_type, typename... args_type>
-		inline oosl::node::object::ptr_type apply_visitor(variant_type &value, args_type &&... args){
+		inline oosl::node::object::ptr_type apply_visitor(const variant_type &value, args_type &&... args){
 			visitor_type visitor(std::forward<args_type>(args)...);
 			return boost::apply_visitor(visitor, value);
 		}

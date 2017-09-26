@@ -9,9 +9,9 @@
 
 int main(){
 	oosl::lexer::skipper skipper;
-	oosl::lexer::numeric_literal_grammar gram;
+	oosl::lexer::literal_grammar gram;
 
-	std::vector<OOSL_AST_QNAME(num)> ast_list;
+	std::vector<OOSL_AST_QNAME(lit)> ast_list;
 	std::vector<oosl::node::object::ptr_type> node_list;
 
 	std::string buffer;
@@ -19,8 +19,8 @@ int main(){
 
 	auto pv = boost::spirit::qi::phrase_parse(buffer.c_str(), buffer.c_str() + buffer.size(), gram >> *gram, skipper, ast_list);
 	if (pv){
-		for (auto &num : ast_list)//Convert to node
-			node_list.push_back(oosl::lexer::apply_visitor<OOSL_AST_JOIN(OOSL_AST_QNAME(num), _visitor)>(num.num, num));
+		for (auto &ast : ast_list)//Convert to node
+			node_list.push_back(oosl::lexer::apply_visitor<OOSL_AST_JOIN(OOSL_AST_QNAME(lit), _visitor)>(ast.lit));
 
 		for (auto nod : node_list)
 			std::cout << nod->print() << std::endl;
