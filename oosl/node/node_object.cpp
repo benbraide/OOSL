@@ -33,12 +33,18 @@ oosl::node::object::entry_type *oosl::node::object::evaluate(){
 }
 
 oosl::node::object::storage_type *oosl::node::object::storage(){
-	auto value = common::controller::active->runtime_info().storage->find(key(), storage_type::find_type::recursive);
-	return ((value == nullptr) ? nullptr : value->storage());
+	auto &run_info = common::controller::active->runtime_info();
+	auto value = run_info.storage->find(key(), run_info.find_type);
+	if (value == nullptr)//Not found
+		return nullptr;
+
+	auto storage_value = value->storage();
+	return ((storage_value == nullptr) ? dynamic_cast<storage_type *>(value->type()) : storage_value);
 }
 
 oosl::node::object::type_object_type *oosl::node::object::type(){
-	auto value = common::controller::active->runtime_info().storage->find(key(), storage_type::find_type::recursive);
+	auto &run_info = common::controller::active->runtime_info();
+	auto value = run_info.storage->find(key(), run_info.find_type);
 	return ((value == nullptr) ? nullptr : value->type());
 }
 

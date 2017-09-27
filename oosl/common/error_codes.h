@@ -13,6 +13,7 @@ namespace oosl{
 			write_violation,
 			invalid_memory_size,
 			tls_error,
+			undefined_object,
 			uninitialized_object,
 			void_object,
 			incompatible_types,
@@ -29,6 +30,7 @@ namespace oosl{
 			bad_integer,
 			number_too_big,
 			invalid_suffix,
+			not_found,
 		};
 	}
 }

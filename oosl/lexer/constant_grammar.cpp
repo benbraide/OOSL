@@ -2,7 +2,7 @@
 
 oosl::lexer::constant_grammar::constant_grammar()
 	: constant_grammar::base_type(start_, "OOSL_CONSTANT"){
-	start_ = constant_symbols_;
+	start_ %= constant_symbols_;
 	constant_symbols_.add
 		("false", constant_type::false_)
 		("true", constant_type::true_)

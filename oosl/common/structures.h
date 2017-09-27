@@ -18,6 +18,7 @@ namespace oosl{
 		struct runtime_block_info{};
 
 		struct runtime_info{
+			oosl::storage::object::find_type find_type;
 			oosl::storage::object *storage;
 			oosl::storage::temporary *temporary_storage;
 			oosl::node::object::ptr_type column;

@@ -63,6 +63,16 @@ oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(const
 	return add_string_scalar_(value, common::controller::active->find_type(type::id::wstring_));
 }
 
+oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(type_object_type &value){
+	auto entry = add_scalar_(reinterpret_cast<uint64_type>(&value), common::controller::active->find_type(type_id_type::type_));
+	common::controller::active->memory().add_dependency(entry->address, std::make_shared<dependency_type>(value.reflect()));
+	return entry;
+}
+
+oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(storage_object_type &value){
+	return add_scalar_(reinterpret_cast<uint64_type>(&value), common::controller::active->find_type(type_id_type::storage_));
+}
+
 oosl::storage::temporary::entry_type *oosl::storage::temporary::wrap(uint64_type address, type_ptr_type type, entry_attribute_type attributes){
 	return &*entry_list_.emplace(entry_list_.end(), entry_type{
 		nullptr,

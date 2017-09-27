@@ -144,6 +144,9 @@ oosl::type::object::driver_type *oosl::type::primitive::driver(){
 		break;
 	case id_type::nan_:
 		return controller_type::active->find_driver(driver_key_type::numeric);
+	case id_type::undefined:
+		throw error_type::undefined_object;
+		break;
 	default:
 		break;
 	}

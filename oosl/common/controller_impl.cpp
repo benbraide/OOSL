@@ -138,4 +138,4 @@ void oosl::common::controller_impl::exit(){
 
 thread_local oosl::common::controller::interpreter_info_type oosl::common::controller_impl::interpreter_info_{};
 
-thread_local oosl::common::controller::runtime_info_type oosl::common::controller_impl::runtime_info_{};
+thread_local oosl::common::controller::runtime_info_type oosl::common::controller_impl::runtime_info_{ oosl::storage::object::find_type::recursive };

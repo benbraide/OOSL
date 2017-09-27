@@ -6,6 +6,7 @@
 #include <list>
 
 #include "storage_entry.h"
+#include "storage_object.h"
 
 #include "../type/type_mapper.h"
 #include "../memory/memory_manager.h"
@@ -18,17 +19,20 @@ namespace oosl{
 		public:
 			typedef unsigned __int64 uint64_type;
 
+			typedef oosl::storage::object storage_object_type;
 			typedef oosl::storage::entry entry_type;
 			typedef entry_type::attribute_type entry_attribute_type;
 
 			typedef oosl::type::bool_type bool_type;
 			typedef oosl::type::other_type other_type;
 
-			typedef oosl::type::object::ptr_type type_ptr_type;
+			typedef oosl::type::object type_object_type;
+			typedef type_object_type::ptr_type type_ptr_type;
 			typedef oosl::type::id type_id_type;
 
 			typedef std::list<entry_type> entry_list_type;
 			typedef oosl::memory::block::attribute_type memory_attribute_type;
+			typedef oosl::memory::value_dependency<type_ptr_type> dependency_type;
 
 			virtual ~temporary();
 
@@ -55,6 +59,10 @@ namespace oosl{
 			entry_type *add_scalar(const std::string &value);
 
 			entry_type *add_scalar(const std::wstring &value);
+
+			entry_type *add_scalar(type_object_type &value);
+
+			entry_type *add_scalar(storage_object_type &value);
 
 			entry_type *wrap(uint64_type address, type_ptr_type type, entry_attribute_type attributes = entry_attribute_type::nil);
 

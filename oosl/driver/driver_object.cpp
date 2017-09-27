@@ -111,7 +111,7 @@ oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &ent
 		case operator_id_type::sizeof_:
 			return temp_storage.add_scalar(size(entry));
 		case operator_id_type::typeof:
-			break;
+			return temp_storage.add_scalar(*entry.type);
 		case operator_id_type::call://(this)
 			return &entry;
 		default:

@@ -12,6 +12,7 @@
 
 #include "../node/node_object.h"
 #include "../common/controller.h"
+#include "../common/structures.h"
 
 #include "../storage/storage_object.h"
 #include "../storage/temporary_storage.h"
