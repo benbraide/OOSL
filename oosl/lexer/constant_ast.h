@@ -23,7 +23,7 @@ namespace oosl{
 			constant_type value;
 		};
 
-		struct OOSL_AST_VISITOR_NAME(constant){
+		OOSL_AST_TO_NODE(constant){
 			typedef oosl::node::object::ptr_type node_ptr_type;
 			typedef oosl::node::id node_id_type;
 			typedef oosl::node::index node_index_type;
@@ -35,7 +35,7 @@ namespace oosl{
 			typedef oosl::type::bool_type bool_type;
 			typedef oosl::type::other_type other_type;
 
-			node_ptr_type operator()(const OOSL_AST_NAME(constant) &value){
+			static oosl::node::object::ptr_type get(OOSL_AST_NAME(constant) &ast){
 				return std::make_shared<inplace_type>(node_id_type::constant, node_index_type{}, [](inplace_type &owner, inplace_target_type target, void *out) -> bool{
 					switch (target){
 					case inplace_target_type::eval:
@@ -93,7 +93,7 @@ namespace oosl{
 					}
 
 					return false;
-				}, value.value);
+				}, ast.value);
 			}
 		};
 	}

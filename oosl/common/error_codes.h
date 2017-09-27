@@ -31,6 +31,8 @@ namespace oosl{
 			number_too_big,
 			invalid_suffix,
 			not_found,
+			storage_not_found,
+			type_not_found,
 		};
 	}
 }

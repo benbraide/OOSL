@@ -12,6 +12,7 @@ namespace oosl{
 			integral,
 			operator_,
 			identifier,
+			qualified,
 			type,
 			enum_,
 			union_,

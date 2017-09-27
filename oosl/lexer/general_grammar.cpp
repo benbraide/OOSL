@@ -13,12 +13,12 @@ oosl::lexer::global_qualified_grammar::global_qualified_grammar()
 
 oosl::lexer::recursive_qualified_grammar::recursive_qualified_grammar()
 	: recursive_qualified_grammar::base_type(start_, "OOSL_RECURSIVE_QUALIFIED"){
-	start_ %= identifier_ >> -("::" >> (*this | identifier_));
+	start_ %= identifier_ >> "::" >> (*this | identifier_);
 }
 
 oosl::lexer::relative_qualified_grammar::relative_qualified_grammar()
 	: relative_qualified_grammar::base_type(start_, "OOSL_RELATIVE_QUALIFIED"){
-	start_ %= (global_qualified_ | identifier_) >> "::" >> recursive_qualified_;
+	start_ %= (global_qualified_ | identifier_) >> "::" >> (recursive_qualified_ | identifier_);
 }
 
 oosl::lexer::qualified_grammar::qualified_grammar()

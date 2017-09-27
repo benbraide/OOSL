@@ -20,7 +20,7 @@ int main(){
 	auto pv = boost::spirit::qi::phrase_parse(buffer.c_str(), buffer.c_str() + buffer.size(), gram >> *gram, skipper, ast_list);
 	if (pv){
 		for (auto &ast : ast_list)//Convert to node
-			node_list.push_back(OOSL_AST_TO_NODE_QGET(lit, ast));
+			node_list.push_back(OOSL_AST_TO_NODE_QGET(ast));
 
 		for (auto nod : node_list)
 			std::cout << nod->print() << std::endl;

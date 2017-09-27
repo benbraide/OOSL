@@ -175,7 +175,7 @@ namespace oosl{
 				}
 
 				OOSL_AST_NAME(integer) integer_value{ converted_value, ast.suff };
-				return OOSL_AST_TO_NODE_GET(integer, integer_value);
+				return OOSL_AST_TO_NODE_GET(integer_value);
 			}
 		};
 
