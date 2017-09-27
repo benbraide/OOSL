@@ -16,6 +16,8 @@
 #include "../storage/storage_object.h"
 #include "../storage/temporary_storage.h"
 
+#include "skipper.h"
+
 #define OOSL_AST_JOIN_(x, y) x ## y
 #define OOSL_AST_JOIN(x, y) OOSL_AST_JOIN_(x, y)
 

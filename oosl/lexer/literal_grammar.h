@@ -3,7 +3,6 @@
 #ifndef OOSL_LITERAL_GRAMMAR_H
 #define OOSL_LITERAL_GRAMMAR_H
 
-#include "skipper.h"
 #include "literal_ast.h"
 
 namespace oosl{

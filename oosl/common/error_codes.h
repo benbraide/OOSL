@@ -24,6 +24,8 @@ namespace oosl{
 			not_implemented,
 			driver_not_found,
 			writer_not_found,
+			bad_constant,
+			bad_char,
 			bad_integer,
 			number_too_big,
 			invalid_suffix,

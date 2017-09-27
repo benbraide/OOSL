@@ -11,7 +11,7 @@ oosl::common::controller_impl::controller_impl()
 	type_list_[type_id_type::auto_] = std::make_shared<oosl::type::primitive>(type_id_type::auto_);
 	type_list_[type_id_type::nan_] = std::make_shared<oosl::type::primitive>(type_id_type::nan_);
 
-	for (auto id = type_id_type::void_; id <= type_id_type::wchar_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
+	for (auto id = type_id_type::undefined; id <= type_id_type::wchar_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
 		type_list_[id] = std::make_shared<oosl::type::primitive>(id);//Add range
 
 	for (auto id = type_id_type::string_; id <= type_id_type::wstring_; id = static_cast<type_id_type>(static_cast<int>(id) + 1))
@@ -41,8 +41,9 @@ oosl::common::controller_impl::controller_impl()
 	static_value_list_[static_value_type::true_] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::true_);
 	static_value_list_[static_value_type::indeterminate] = internal_temporary_storage_.add_scalar(oosl::type::bool_type::indeterminate);
 
-	static_value_list_[static_value_type::nullptr_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nullptr_]);
-	static_value_list_[static_value_type::nan_] = internal_temporary_storage_.add_scalar(static_cast<uint64_type>(0), type_list_[type_id_type::nan_]);
+	static_value_list_[static_value_type::nullptr_] = internal_temporary_storage_.add_scalar(nullptr);
+	static_value_list_[static_value_type::nan_] = internal_temporary_storage_.add_scalar(oosl::type::other_type::nan_);
+	static_value_list_[static_value_type::undefined] = internal_temporary_storage_.add_scalar(oosl::type::other_type::undefined);
 
 	OOSL_REMOVE(states_, state_type::initializing);
 }

@@ -22,6 +22,8 @@ namespace oosl{
 			typedef entry_type::attribute_type entry_attribute_type;
 
 			typedef oosl::type::bool_type bool_type;
+			typedef oosl::type::other_type other_type;
+
 			typedef oosl::type::object::ptr_type type_ptr_type;
 			typedef oosl::type::id type_id_type;
 
@@ -44,7 +46,11 @@ namespace oosl{
 				return add_scalar_(value, type);
 			}
 
+			entry_type *add_scalar(std::nullptr_t);
+
 			entry_type *add_scalar(bool_type value);
+
+			entry_type *add_scalar(other_type value);
 
 			entry_type *add_scalar(const std::string &value);
 

@@ -68,6 +68,7 @@ namespace oosl{
 				true_,
 				nullptr_,
 				nan_,
+				undefined,
 			};
 
 			enum class driver_type{

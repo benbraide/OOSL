@@ -61,10 +61,20 @@ namespace oosl{
 				case type_id_type::ldouble:
 					return value_<from_type, long double>(entry, to, destination);
 				case type_id_type::string_:
-					*reinterpret_cast<std::string *>(destination) = std::to_string(oosl::common::controller::active->memory().read<from_type>(entry.address));
+					if (OOSL_IS(entry.attributes, attribute_type::nan_))
+						*reinterpret_cast<std::string *>(destination) = "NaN";
+					else if (std::is_floating_point_v<from_type>)//Real value
+						*reinterpret_cast<std::string *>(destination) = oosl::common::controller::real_to_string<std::string>(oosl::common::controller::active->memory().read<from_type>(entry.address));
+					else//Non-NaN
+						*reinterpret_cast<std::string *>(destination) = std::to_string(oosl::common::controller::active->memory().read<from_type>(entry.address));
 					return;
 				case type_id_type::wstring_:
-					*reinterpret_cast<std::wstring *>(destination) = std::to_wstring(oosl::common::controller::active->memory().read<from_type>(entry.address));
+					if (OOSL_IS(entry.attributes, attribute_type::nan_))
+						*reinterpret_cast<std::wstring *>(destination) = L"NaN";
+					else if (std::is_floating_point_v<from_type>)//Real value
+						*reinterpret_cast<std::wstring *>(destination) = oosl::common::controller::real_to_string<std::wstring>(oosl::common::controller::active->memory().read<from_type>(entry.address));
+					else//Non-NaN
+						*reinterpret_cast<std::wstring *>(destination) = std::to_wstring(oosl::common::controller::active->memory().read<from_type>(entry.address));
 					return;
 				default:
 					break;

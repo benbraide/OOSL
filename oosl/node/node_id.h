@@ -8,6 +8,7 @@ namespace oosl{
 		enum class id{
 			nil,
 			literal_,
+			constant,
 			integral,
 			operator_,
 			identifier,

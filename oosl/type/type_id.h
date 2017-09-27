@@ -9,6 +9,7 @@ namespace oosl{
 			nil,
 			auto_,
 			any_,
+			undefined,
 			void_,
 			bool_,
 			byte_,

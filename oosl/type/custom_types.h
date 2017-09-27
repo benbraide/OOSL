@@ -11,6 +11,12 @@ namespace oosl{
 			true_			= '\x2',
 		};
 
+		enum class other_type{
+			nil,
+			nan_,
+			undefined,
+		};
+
 		enum class int128_type : char{
 			unused
 		};

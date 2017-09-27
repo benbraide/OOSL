@@ -51,8 +51,13 @@ oosl::driver::object::entry_type *oosl::driver::numeric::cast(entry_type &entry,
 
 void oosl::driver::numeric::echo(entry_type &entry, output_writer_type &writer){
 	std::string target;
-	value(entry, type_id_type::string_, reinterpret_cast<char *>(&target));
-	target += suffix_(entry);
+	if (!OOSL_IS(entry.attributes, attribute_type::nan_)){
+		value(entry, type_id_type::string_, reinterpret_cast<char *>(&target));
+		target += suffix_(entry);
+	}
+	else//NaN
+		target = "NaN";
+	
 	writer.write(target.c_str());
 }
 
