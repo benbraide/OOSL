@@ -23,7 +23,7 @@ namespace oosl{
 			constant_type value;
 		};
 
-		struct OOSL_AST_JOIN(OOSL_AST_NAME(constant), _visitor){
+		struct OOSL_AST_VISITOR_NAME(constant){
 			typedef oosl::node::object::ptr_type node_ptr_type;
 			typedef oosl::node::id node_id_type;
 			typedef oosl::node::index node_index_type;

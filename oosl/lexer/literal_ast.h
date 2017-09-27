@@ -75,7 +75,7 @@ namespace oosl{
 			boost::optional<numeric_suffix_type> suff;
 		};
 
-		struct OOSL_AST_JOIN(OOSL_AST_NAME(num), _visitor) : public boost::static_visitor<oosl::node::object::ptr_type>{
+		struct OOSL_AST_VISITOR_PROLOG(num){
 			typedef oosl::node::object::ptr_type node_ptr_type;
 			typedef oosl::node::id node_id_type;
 			typedef oosl::node::index node_index_type;
@@ -83,7 +83,7 @@ namespace oosl{
 			typedef oosl::node::inplace_target_type inplace_target_type;
 			typedef oosl::storage::object::entry_type entry_type;
 
-			OOSL_AST_JOIN(OOSL_AST_NAME(num), _visitor)(const OOSL_AST_NAME(num) &object)
+			OOSL_AST_VISITOR_NAME(num)(const OOSL_AST_NAME(num) &object)
 				: object_(&object){}
 
 			node_ptr_type operator()(const OOSL_AST_NAME(rad) &value){
@@ -185,7 +185,7 @@ namespace oosl{
 			quote_type quote;
 		};
 
-		struct OOSL_AST_JOIN(OOSL_AST_NAME(quote), _visitor) : public boost::static_visitor<oosl::node::object::ptr_type>{
+		struct OOSL_AST_VISITOR_PROLOG(quote){
 			typedef oosl::node::object::ptr_type node_ptr_type;
 			typedef oosl::node::id node_id_type;
 			typedef oosl::node::index node_index_type;
@@ -267,15 +267,15 @@ namespace oosl{
 			lit_type lit;
 		};
 
-		struct OOSL_AST_JOIN(OOSL_AST_NAME(lit), _visitor) : public boost::static_visitor<oosl::node::object::ptr_type>{
+		struct OOSL_AST_VISITOR_PROLOG(lit){
 			typedef oosl::node::object::ptr_type node_ptr_type;
 
 			node_ptr_type operator()(const OOSL_AST_NAME(num) &value){
-				return oosl::lexer::apply_visitor<OOSL_AST_JOIN(OOSL_AST_NAME(num), _visitor)>(value.num, value);
+				return oosl::lexer::apply_visitor<OOSL_AST_VISITOR_NAME(num)>(value.num, value);
 			}
 
 			node_ptr_type operator()(const OOSL_AST_NAME(quote) &value){
-				return oosl::lexer::apply_visitor<OOSL_AST_JOIN(OOSL_AST_NAME(quote), _visitor)>(value.quote);
+				return oosl::lexer::apply_visitor<OOSL_AST_VISITOR_NAME(quote)>(value.quote);
 			}
 		};
 	}

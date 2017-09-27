@@ -24,6 +24,11 @@
 #define OOSL_AST_NAME(name) OOSL_AST_JOIN(name, _ast_type)
 #define OOSL_AST_QNAME(name) OOSL_AST_JOIN(oosl::lexer::, OOSL_AST_NAME(name))
 
+#define OOSL_AST_VISITOR_NAME(name) OOSL_AST_JOIN(OOSL_AST_NAME(name), _visitor)
+#define OOSL_AST_VISITOR_QNAME(name) OOSL_AST_JOIN(OOSL_AST_QNAME(name), _visitor)
+
+#define OOSL_AST_VISITOR_PROLOG(name) OOSL_AST_JOIN(OOSL_AST_NAME(name), _visitor) : public boost::static_visitor<oosl::node::object::ptr_type>
+
 namespace oosl{
 	namespace lexer{
 		template <class visitor_type, class variant_type, typename... args_type>
