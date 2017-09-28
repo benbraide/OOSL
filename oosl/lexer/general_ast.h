@@ -267,6 +267,22 @@ namespace oosl{
 			}
 		};
 
+		struct OOSL_AST_NAME(full_identifier_compatible){
+			typedef boost::variant<
+				OOSL_AST_NAME(qualified),
+				OOSL_AST_NAME(identifier_compatible)
+			> value_type;
+			value_type value;
+		};
+
+		OOSL_AST_VISITOR_2(full_identifier_compatible, qualified, identifier_compatible);
+
+		OOSL_AST_TO_NODE(full_identifier_compatible){
+			static oosl::node::object::ptr_type get(OOSL_AST_NAME(full_identifier_compatible) &ast){
+				return OOSL_AST_APPLY_VISITOR(full_identifier_compatible, ast.value);
+			}
+		};
+
 		struct OOSL_AST_NAME(system_call){
 			unsigned int value;
 		};
@@ -335,6 +351,11 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
 	OOSL_AST_QNAME(qualified),
 	(OOSL_AST_QNAME(qualified)::value_type, value)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+	OOSL_AST_QNAME(full_identifier_compatible),
+	(OOSL_AST_QNAME(full_identifier_compatible)::value_type, value)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

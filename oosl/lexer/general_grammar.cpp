@@ -38,3 +38,15 @@ oosl::lexer::qualified_grammar::qualified_grammar()
 	: qualified_grammar::base_type(start_, "OOSL_QUALIFIED"){
 	start_ = relative_qualified_ | global_qualified_;
 }
+
+oosl::lexer::full_identifier_compatible_grammar::full_identifier_compatible_grammar()
+	: full_identifier_compatible_grammar::base_type(start_, "OOSL_FULL_IDENITIFIER_COMPATIBLE"){
+	using namespace boost::spirit;
+	start_ %= qualified_ | identifier_;
+}
+
+oosl::lexer::system_call_grammar::system_call_grammar()
+	: system_call_grammar::base_type(start_, "OOSL_SYSTEM_CALL"){
+	using namespace boost::spirit;
+	start_ %= "__call" > qi::lit("(") > qi::uint_ > ")";
+}

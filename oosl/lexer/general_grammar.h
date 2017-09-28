@@ -95,6 +95,30 @@ namespace oosl{
 			relative_qualified_grammar relative_qualified_;
 			global_qualified_grammar global_qualified_;
 		};
+
+		class full_identifier_compatible_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(full_identifier_compatible)(), skipper>{
+		public:
+			typedef const char *iterator_type;
+			typedef boost::spirit::qi::rule<iterator_type, OOSL_AST_NAME(full_identifier_compatible)(), skipper> start_rule_type;
+
+			full_identifier_compatible_grammar();
+
+		protected:
+			start_rule_type start_;
+			qualified_grammar qualified_;
+			identifier_compatible_grammar identifier_;
+		};
+
+		class system_call_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(system_call)(), skipper>{
+		public:
+			typedef const char *iterator_type;
+			typedef boost::spirit::qi::rule<iterator_type, OOSL_AST_NAME(system_call)(), skipper> start_rule_type;
+
+			system_call_grammar();
+
+		protected:
+			start_rule_type start_;
+		};
 	}
 }
 
