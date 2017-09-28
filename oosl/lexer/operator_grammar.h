@@ -24,6 +24,51 @@ namespace oosl{
 				start_ %= symbols_ >> qi::omit[qi::no_skip[!(qi::punct - qi::char_(OOSL_AST_OPERATOR_EXCLUDES))]];
 
 				switch (id){
+				case operator_id_type::nil:
+					symbols_.add
+						("<<=", operator_id_type::compound_left_shift)
+						(">>=", operator_id_type::compound_right_shift)
+						("*=", operator_id_type::compound_times)
+						("/=", operator_id_type::compound_divide)
+						("%=", operator_id_type::compound_modulus)
+						("+=", operator_id_type::compound_plus)
+						("-=", operator_id_type::compound_minus)
+						("&=", operator_id_type::compound_bitwise_and)
+						("^=", operator_id_type::compound_bitwise_xor)
+						("|=", operator_id_type::compound_bitwise_or)
+						("===", operator_id_type::explicit_equality)
+						("!==", operator_id_type::explicit_inverse_equality)
+						("==", operator_id_type::equality)
+						("!=", operator_id_type::inverse_equality)
+						("&&", operator_id_type::relational_and)
+						("||", operator_id_type::relational_or)
+						("->", operator_id_type::member_pointer_access)
+						("<<", operator_id_type::left_shift)
+						(">>", operator_id_type::right_shift)
+						("<=", operator_id_type::less_or_equal)
+						(">=", operator_id_type::more_or_equal)
+						("++", operator_id_type::increment)
+						("--", operator_id_type::decrement)
+						("=", operator_id_type::assignment)
+						(".", operator_id_type::member_access)
+						("*", operator_id_type::times)
+						("/", operator_id_type::divide)
+						("%", operator_id_type::modulus)
+						("+", operator_id_type::plus)
+						("-", operator_id_type::minus)
+						("<", operator_id_type::less)
+						(">", operator_id_type::more)
+						("&", operator_id_type::bitwise_and)
+						("^", operator_id_type::bitwise_xor)
+						("|", operator_id_type::bitwise_or)
+						("~", operator_id_type::bitwise_not)
+						("!", operator_id_type::relational_not)
+						(",", operator_id_type::comma)
+						("new", operator_id_type::new_)
+						("delete", operator_id_type::delete_)
+						("sizeof", operator_id_type::sizeof_)
+						("typeof", operator_id_type::typeof);
+					break;
 				case operator_id_type::member_access:
 					symbols_.add
 						("->", operator_id_type::member_pointer_access)
@@ -81,11 +126,11 @@ namespace oosl{
 					break;
 				case operator_id_type::comma:
 					symbols_.add
-					(",", operator_id_type::comma);
+						(",", operator_id_type::comma);
 					break;
 				case operator_id_type::ternary:
 					symbols_.add
-					("?", operator_id_type::ternary);
+						("?", operator_id_type::ternary);
 					break;
 				case operator_id_type::assignment:
 					symbols_.add
@@ -125,6 +170,7 @@ namespace oosl{
 		using comma_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(comma), oosl::common::operator_id::comma>;
 		using ternary_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(ternary), oosl::common::operator_id::ternary>;
 		using assignment_operator_grammar		= operator_grammar<OOSL_AST_OPERATOR_NAME(assignment), oosl::common::operator_id::assignment>;
+		using known_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(known), oosl::common::operator_id::nil>;
 
 		class unknown_operator_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_OPERATOR_NAME(unknown)(), skipper>{
 		public:

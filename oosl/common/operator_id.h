@@ -6,6 +6,7 @@
 namespace oosl{
 	namespace common{
 		enum class operator_id{
+			nil,
 			comma,
 			assignment,
 			compound_plus,
