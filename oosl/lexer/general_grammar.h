@@ -4,6 +4,7 @@
 #define OOSL_GENERAL_GRAMMAR_H
 
 #include "general_ast.h"
+#include "literal_grammar.h"
 
 namespace oosl{
 	namespace lexer{
@@ -18,6 +19,32 @@ namespace oosl{
 			start_rule_type start_;
 		};
 
+		class placeholder_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(placeholder)(), skipper>{
+		public:
+			typedef const char *iterator_type;
+			typedef boost::spirit::qi::rule<iterator_type, OOSL_AST_NAME(placeholder)(), skipper> start_rule_type;
+
+			placeholder_grammar();
+
+		protected:
+			start_rule_type start_;
+			string_literal_grammar string_literal_;
+			identifier_grammar identifier_;
+		};
+
+		class identifier_compatible_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(identifier_compatible)(), skipper>{
+		public:
+			typedef const char *iterator_type;
+			typedef boost::spirit::qi::rule<iterator_type, OOSL_AST_NAME(identifier_compatible)(), skipper> start_rule_type;
+
+			identifier_compatible_grammar();
+
+		protected:
+			start_rule_type start_;
+			placeholder_grammar placeholder_;
+			identifier_grammar identifier_;
+		};
+
 		class global_qualified_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(global_qualified)(), skipper>{
 		public:
 			typedef const char *iterator_type;
@@ -27,7 +54,7 @@ namespace oosl{
 
 		protected:
 			start_rule_type start_;
-			identifier_grammar identifier_;
+			identifier_compatible_grammar identifier_;
 		};
 
 		class recursive_qualified_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(recursive_qualified)(), skipper>{
@@ -39,7 +66,7 @@ namespace oosl{
 
 		protected:
 			start_rule_type start_;
-			identifier_grammar identifier_;
+			identifier_compatible_grammar identifier_;
 		};
 
 		class relative_qualified_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(relative_qualified)(), skipper>{
@@ -51,7 +78,7 @@ namespace oosl{
 
 		protected:
 			start_rule_type start_;
-			identifier_grammar identifier_;
+			identifier_compatible_grammar identifier_;
 			recursive_qualified_grammar recursive_qualified_;
 			global_qualified_grammar global_qualified_;
 		};

@@ -1,9 +1,22 @@
 #include "general_grammar.h"
+#include "expression_grammar.h"
 
 oosl::lexer::identifier_grammar::identifier_grammar()
 	: identifier_grammar::base_type(start_, "OOSL_IDENITIFIER"){
 	using namespace boost::spirit;
 	start_ %= qi::lexeme[qi::char_("$_A-Za-z") >> *qi::char_("$_A-Za-z0-9")];
+}
+
+oosl::lexer::placeholder_grammar::placeholder_grammar()
+	: placeholder_grammar::base_type(start_, "OOSL_PLACEHOLDER"){
+	using namespace boost::spirit;
+	start_ %= "__placeholder" > qi::lit("(") > (string_literal_ | identifier_) > ")";
+}
+
+oosl::lexer::identifier_compatible_grammar::identifier_compatible_grammar()
+	: identifier_compatible_grammar::base_type(start_, "OOSL_IDENITIFIER_COMPATIBLE"){
+	using namespace boost::spirit;
+	start_ %= placeholder_ | identifier_;
 }
 
 oosl::lexer::global_qualified_grammar::global_qualified_grammar()

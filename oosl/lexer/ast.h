@@ -25,6 +25,9 @@
 #define OOSL_AST_NAME(name) OOSL_AST_JOIN(name, _ast_type)
 #define OOSL_AST_QNAME(name) OOSL_AST_JOIN(oosl::lexer::, OOSL_AST_NAME(name))
 
+#define OOSL_AST_RECURSIVE_NAME(name) boost::recursive_wrapper<OOSL_AST_NAME(name)>
+#define OOSL_AST_RECURSIVE_QNAME(name) boost::recursive_wrapper<OOSL_AST_QNAME(name)>
+
 #define OOSL_AST_VISITOR_NAME(name) OOSL_AST_JOIN(OOSL_AST_NAME(name), _visitor)
 #define OOSL_AST_VISITOR_QNAME(name) OOSL_AST_JOIN(OOSL_AST_QNAME(name), _visitor)
 

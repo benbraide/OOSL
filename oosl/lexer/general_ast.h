@@ -4,12 +4,35 @@
 #define OOSL_GENERAL_AST_H
 
 #include "../node/inplace_node.h"
+#include "../driver/driver_object.h"
 #include "../common/raii.h"
 
 #include "ast.h"
+#include "literal_ast.h"
 
 namespace oosl{
 	namespace lexer{
+		struct lookup_helper{
+			static oosl::storage::object::entry_type *lookup(const std::string &key){
+				auto &runtime_info = oosl::common::controller::active->runtime_info();
+				auto value = runtime_info.storage->find(key, runtime_info.find_type);
+				if (value != nullptr){
+					auto object_value = value->object();
+					if (object_value == nullptr){//Not an object
+						auto type_value = value->type();
+						if (type_value == nullptr)//Return storage object
+							return oosl::common::controller::active->temporary_storage().add_scalar(*value->storage());
+
+						return oosl::common::controller::active->temporary_storage().add_scalar(*type_value);//Return type object
+					}
+					
+					return object_value;//Is object
+				}
+				
+				throw oosl::common::error_codes::not_found;//Not found
+			}
+		};
+
 		struct OOSL_AST_NAME(identifier){
 			std::string value;
 		};
@@ -27,26 +50,8 @@ namespace oosl{
 				return std::make_shared<inplace_type>(node_id_type::identifier, node_index_type{}, [](inplace_type &owner, inplace_target_type target, void *out) -> bool{
 					switch (target){
 					case inplace_target_type::eval:
-					{//Find object
-						auto &runtime_info = oosl::common::controller::active->runtime_info();
-						auto value = runtime_info.storage->find(owner.value(), runtime_info.find_type);
-						if (value != nullptr){
-							auto object_value = value->object();
-							if (object_value == nullptr){//Not an object
-								auto type_value = value->type();
-								if (type_value == nullptr)//Return storage object
-									*reinterpret_cast<entry_type **>(out) = oosl::common::controller::active->temporary_storage().add_scalar(*value->storage());
-								else//Return type object
-									*reinterpret_cast<entry_type **>(out) = oosl::common::controller::active->temporary_storage().add_scalar(*type_value);
-							}
-							else//Is object
-								*reinterpret_cast<entry_type **>(out) = object_value;
-						}
-						else//Not found
-							throw oosl::common::error_codes::not_found;
-
+						*reinterpret_cast<entry_type **>(out) = lookup_helper::lookup(owner.value());
 						return true;
-					}
 					case inplace_target_type::print:
 					case inplace_target_type::key:
 						*reinterpret_cast<std::string *>(out) = owner.value();
@@ -60,8 +65,67 @@ namespace oosl{
 			}
 		};
 
+		struct OOSL_AST_NAME(placeholder){
+			typedef boost::variant<
+				OOSL_AST_NAME(string),
+				OOSL_AST_NAME(identifier)
+			> value_type;
+			value_type value;
+		};
+
+		OOSL_AST_VISITOR_2(placeholder, string, identifier);
+
+		OOSL_AST_TO_NODE(placeholder){
+			typedef oosl::node::object::ptr_type node_ptr_type;
+			typedef oosl::node::id node_id_type;
+			typedef oosl::node::index node_index_type;
+
+			typedef oosl::node::inplace<node_ptr_type> inplace_type;
+			typedef oosl::node::inplace_target_type inplace_target_type;
+			typedef oosl::storage::object::entry_type entry_type;
+
+			static oosl::node::object::ptr_type get(OOSL_AST_NAME(placeholder) &ast){
+				return std::make_shared<inplace_type>(node_id_type::placeholder, node_index_type{}, [](inplace_type &owner, inplace_target_type target, void *out) -> bool{
+					switch (target){
+					case inplace_target_type::eval:
+						*reinterpret_cast<entry_type **>(out) = lookup_helper::lookup(owner.key());
+						return true;
+					case inplace_target_type::print:
+						*reinterpret_cast<std::string *>(out) = ("__placeholder(" + owner.value()->print() + ")");
+						return true;
+					case inplace_target_type::key:
+					{//Evaluate value and return string value
+						auto value = owner.value()->evaluate();
+						*reinterpret_cast<std::string *>(out) = value->type->driver()->value<std::string>(*value);
+						return true;
+					}
+					default:
+						break;
+					}
+
+					return false;
+				}, OOSL_AST_APPLY_VISITOR(placeholder, ast.value));
+			}
+		};
+
+		struct OOSL_AST_NAME(identifier_compatible){
+			typedef boost::variant<
+				OOSL_AST_NAME(placeholder),
+				OOSL_AST_NAME(identifier)
+			> value_type;
+			value_type value;
+		};
+
+		OOSL_AST_VISITOR_2(identifier_compatible, placeholder, identifier);
+
+		OOSL_AST_TO_NODE(identifier_compatible){
+			static oosl::node::object::ptr_type get(OOSL_AST_NAME(identifier_compatible) &ast){
+				return OOSL_AST_APPLY_VISITOR(identifier_compatible, ast.value);
+			}
+		};
+
 		struct OOSL_AST_NAME(global_qualified){
-			OOSL_AST_NAME(identifier) value;
+			OOSL_AST_NAME(identifier_compatible) value;
 		};
 
 		OOSL_AST_TO_NODE(global_qualified){
@@ -145,13 +209,13 @@ namespace oosl{
 		struct OOSL_AST_NAME(recursive_qualified){
 			typedef boost::variant<
 				boost::recursive_wrapper<OOSL_AST_NAME(recursive_qualified)>,
-				OOSL_AST_NAME(identifier)
+				OOSL_AST_NAME(identifier_compatible)
 			> right_type;
-			OOSL_AST_NAME(identifier) left;
+			OOSL_AST_NAME(identifier_compatible) left;
 			right_type right;
 		};
 
-		OOSL_AST_VISITOR_INTERFACE_2(recursive_qualified, recursive_qualified, identifier);
+		OOSL_AST_VISITOR_INTERFACE_2(recursive_qualified, recursive_qualified, identifier_compatible);
 
 		OOSL_AST_TO_NODE(recursive_qualified){
 			static oosl::node::object::ptr_type get(OOSL_AST_NAME(recursive_qualified) &ast){
@@ -164,20 +228,20 @@ namespace oosl{
 		struct OOSL_AST_NAME(relative_qualified){
 			typedef boost::variant<
 				OOSL_AST_NAME(global_qualified),
-				OOSL_AST_NAME(identifier)
+				OOSL_AST_NAME(identifier_compatible)
 			> left_type;
 
 			typedef boost::variant<
 				OOSL_AST_NAME(recursive_qualified),
-				OOSL_AST_NAME(identifier)
+				OOSL_AST_NAME(identifier_compatible)
 			> right_type;
 
 			left_type left;
 			right_type right;
 		};
 
-		OOSL_AST_VISITOR_2(relative_qualified_left, global_qualified, identifier);
-		OOSL_AST_VISITOR_2(relative_qualified_right, recursive_qualified, identifier);
+		OOSL_AST_VISITOR_2(relative_qualified_left, global_qualified, identifier_compatible);
+		OOSL_AST_VISITOR_2(relative_qualified_right, recursive_qualified, identifier_compatible);
 
 		OOSL_AST_TO_NODE(relative_qualified){
 			static oosl::node::object::ptr_type get(OOSL_AST_NAME(relative_qualified) &ast){
@@ -202,6 +266,37 @@ namespace oosl{
 				return OOSL_AST_APPLY_VISITOR(qualified, ast.value);
 			}
 		};
+
+		struct OOSL_AST_NAME(system_call){
+			unsigned int value;
+		};
+
+		OOSL_AST_TO_NODE(system_call){
+			typedef oosl::node::object::ptr_type node_ptr_type;
+			typedef oosl::node::id node_id_type;
+			typedef oosl::node::index node_index_type;
+
+			typedef oosl::node::inplace<unsigned int> inplace_type;
+			typedef oosl::node::inplace_target_type inplace_target_type;
+			typedef oosl::storage::object::entry_type entry_type;
+
+			static oosl::node::object::ptr_type get(OOSL_AST_NAME(system_call) &ast){
+				return std::make_shared<inplace_type>(node_id_type::placeholder, node_index_type{}, [](inplace_type &owner, inplace_target_type target, void *out) -> bool{
+					switch (target){
+					case inplace_target_type::eval:
+						//*reinterpret_cast<entry_type **>(out) = lookup_helper::lookup(owner.key());
+						return true;
+					case inplace_target_type::print:
+						*reinterpret_cast<std::string *>(out) = ("__call(" + std::to_string(owner.value()) + ")");
+						return true;
+					default:
+						break;
+					}
+
+					return false;
+				}, ast.value);
+			}
+		};
 	}
 }
 
@@ -211,13 +306,23 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
+	OOSL_AST_QNAME(placeholder),
+	(OOSL_AST_QNAME(placeholder)::value_type, value)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+	OOSL_AST_QNAME(identifier_compatible),
+	(OOSL_AST_QNAME(identifier_compatible)::value_type, value)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
 	OOSL_AST_QNAME(global_qualified),
-	(OOSL_AST_QNAME(identifier), value)
+	(OOSL_AST_QNAME(identifier_compatible), value)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
 	OOSL_AST_QNAME(recursive_qualified),
-	(OOSL_AST_QNAME(identifier), left)
+	(OOSL_AST_QNAME(identifier_compatible), left)
 	(OOSL_AST_QNAME(recursive_qualified)::right_type, right)
 )
 
@@ -230,6 +335,11 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
 	OOSL_AST_QNAME(qualified),
 	(OOSL_AST_QNAME(qualified)::value_type, value)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+	OOSL_AST_QNAME(system_call),
+	(unsigned int, value)
 )
 
 #endif /* !OOSL_GENERAL_AST_H */
