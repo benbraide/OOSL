@@ -100,6 +100,23 @@ namespace oosl{
 			identifier_compatible_grammar identifier_compatible_;
 			modified_type_grammar modified_type_;
 		};
+
+		class specified_type_grammar : public grammar{
+		public:
+			typedef oosl::type::object::attribute type_attribute_type;
+
+			specified_type_grammar();
+
+			static node_ptr_type create(type_attribute_type attributes, node_ptr_type value);
+
+			static std::string print_attributes(type_attribute_type value);
+
+		protected:
+			type_specifier_grammar type_specifier_;
+			type_grammar type_;
+			identifier_compatible_grammar identifier_compatible_;
+			modified_type_grammar modified_type_;
+		};
 	}
 }
 

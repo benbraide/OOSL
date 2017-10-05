@@ -203,3 +203,7 @@ bool oosl::type::modified::is_nan(){
 bool oosl::type::modified::is_modified(){
 	return underlying_type_->is_modified();
 }
+
+oosl::type::object::attribute &oosl::type::modified::attributes_ref(){
+	return attributes_;
+}

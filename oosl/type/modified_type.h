@@ -101,6 +101,8 @@ namespace oosl{
 
 			virtual bool is_modified() override;
 
+			virtual attribute &attributes_ref();
+
 		protected:
 			ptr_type underlying_type_;
 			attribute attributes_;

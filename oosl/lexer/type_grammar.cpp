@@ -254,3 +254,54 @@ oosl::lexer::grammar::node_ptr_type oosl::lexer::typename_type_grammar::create(n
 		return false;
 	}, value);
 }
+
+oosl::lexer::specified_type_grammar::specified_type_grammar()
+	: grammar("OOSL_SPECIFIED_TYPE"){
+	using namespace boost::spirit;
+
+	start_ = (type_specifier_ > (type_ | modified_type_ | identifier_compatible_))[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2)];
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::specified_type_grammar::create(type_attribute_type attributes, node_ptr_type value){
+	typedef oosl::node::inplace<std::pair<node_ptr_type, type_ptr_type>> node_type;
+
+	return std::make_shared<node_type>(node_id_type::type, [attributes](node_type &owner, inplace_target_type target, void *out) -> bool{
+		switch (target){
+		case inplace_target_type::print:
+			reinterpret_cast<output_writer_type *>(out)->write(print_attributes(attributes));
+			owner.value().first->echo(*reinterpret_cast<output_writer_type *>(out));
+			return true;
+		case inplace_target_type::type:
+			break;
+		default:
+			return false;
+		}
+
+		auto &value = owner.value();
+		if (value.second == nullptr){//Evaluate
+			auto underlying_type = value.first->type();
+			auto modified_type = dynamic_cast<oosl::type::modified *>(underlying_type);
+
+			if (modified_type == nullptr){//Add attributes
+				OOSL_SET(modified_type->attributes_ref(), attributes);
+				value.second = underlying_type->reflect();
+			}
+			else//Create
+				value.second = std::make_shared<oosl::type::modified>(underlying_type->reflect(), attributes);
+		}
+
+		*reinterpret_cast<type_object_type **>(out) = value.second.get();
+		return true;
+	}, std::make_pair(value, nullptr));
+}
+
+std::string oosl::lexer::specified_type_grammar::print_attributes(type_attribute_type value){
+	std::string string_value;
+	if (OOSL_IS(value, type_attribute_type::static_))
+		string_value = "static ";
+
+	if (OOSL_IS(value, type_attribute_type::tls))
+		string_value += "thread_local ";
+
+	return string_value;
+}
