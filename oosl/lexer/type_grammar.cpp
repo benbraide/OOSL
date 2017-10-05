@@ -227,3 +227,30 @@ oosl::lexer::grammar::node_ptr_type oosl::lexer::full_modified_type_grammar::cre
 		return true;
 	}, std::make_pair(value, nullptr));
 }
+
+oosl::lexer::typename_type_grammar::typename_type_grammar()
+	: grammar("OOSL_TYPENAME_TYPE"){
+	using namespace boost::spirit;
+
+	start_ = ("typename" > (type_ | modified_type_ | identifier_compatible_))[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::typename_type_grammar::create(node_ptr_type value){
+	typedef oosl::node::inplace<node_ptr_type> node_type;
+
+	return std::make_shared<node_type>(node_id_type::type, [](node_type &owner, inplace_target_type target, void *out) -> bool{
+		switch (target){
+		case inplace_target_type::print:
+			reinterpret_cast<output_writer_type *>(out)->write("typename ");
+			owner.value()->echo(*reinterpret_cast<output_writer_type *>(out));
+			return true;
+		case inplace_target_type::type:
+			*reinterpret_cast<type_object_type **>(out) = owner.value()->type();
+			return true;
+		default:
+			break;
+		}
+
+		return false;
+	}, value);
+}

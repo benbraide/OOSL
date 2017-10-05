@@ -88,6 +88,18 @@ namespace oosl{
 			identifier_compatible_grammar identifier_compatible_;
 			modified_type_grammar modified_type_;
 		};
+
+		class typename_type_grammar : public grammar{
+		public:
+			typename_type_grammar();
+
+			static node_ptr_type create(node_ptr_type value);
+
+		protected:
+			type_grammar type_;
+			identifier_compatible_grammar identifier_compatible_;
+			modified_type_grammar modified_type_;
+		};
 	}
 }
 
