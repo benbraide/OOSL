@@ -3,20 +3,29 @@
 #ifndef OOSL_CONSTANT_GRAMMAR_H
 #define OOSL_CONSTANT_GRAMMAR_H
 
-#include "constant_ast.h"
+#include "grammar.h"
 
 namespace oosl{
 	namespace lexer{
-		class constant_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_NAME(constant)(), skipper>{
+		class constant_grammar : public grammar{
 		public:
-			typedef const char *iterator_type;
-			typedef boost::spirit::qi::rule<iterator_type, OOSL_AST_NAME(constant)(), skipper> start_rule_type;
+			enum class constant_type{
+				nil,
+				false_,
+				true_,
+				indeterminate,
+				nullptr_,
+				nan_,
+				undefined,
+			};
+
 			typedef boost::spirit::qi::symbols<char, constant_type> constant_symbols_type;
 
 			constant_grammar();
 
+			static node_ptr_type create(constant_type value);
+
 		protected:
-			start_rule_type start_;
 			constant_symbols_type constant_symbols_;
 		};
 	}

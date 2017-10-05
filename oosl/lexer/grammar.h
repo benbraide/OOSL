@@ -4,34 +4,51 @@
 #define OOSL_GRAMMAR_H
 
 #include <string>
-#include <unordered_map>
 
-#include "../common/controller.h"
+#include <boost/optional.hpp>
+#include "boost/spirit/include/phoenix.hpp"
 
-#include "rule_id.h"
 #include "skipper.h"
+
+#include "../type/type_object.h"
+#include "../node/inplace_node.h"
+#include "../common/structures.h"
+#include "../driver/driver_object.h"
+#include "../storage/temporary_storage.h"
 
 namespace oosl{
 	namespace lexer{
-		class grammar : public boost::spirit::qi::grammar<const char *, std::string(), skipper>{
+		template <class type>
+		class typed_grammar : public boost::spirit::qi::grammar<const char *, type(), skipper>{
 		public:
 			typedef const char *iterator_type;
-			typedef rule_id rule_id_type;
+			typedef boost::spirit::qi::rule<iterator_type, type(), skipper> rule_type;
 
-			typedef boost::spirit::qi::rule<iterator_type, std::string(), skipper> rule_type;
-			typedef boost::spirit::qi::symbols<char, rule_id_type> symbols_type;
+			typedef oosl::common::output_writer output_writer_type;
+			typedef output_writer_type::write_option_type write_option_type;
+
+			typedef oosl::node::id node_id_type;
+			typedef oosl::node::inplace_target_type inplace_target_type;
+			typedef oosl::node::object::ptr_type node_ptr_type;
+
 			typedef oosl::type::id type_id_type;
+			typedef oosl::type::object type_object_type;
+			typedef type_object_type::ptr_type type_ptr_type;
 
-			typedef std::unordered_map<rule_id_type, rule_type> rule_list_type;
+			typedef oosl::storage::object::entry_type entry_type;
 
-			grammar();
+			explicit typed_grammar(const std::string &name = "OOSL_GENERIC_TYPED_GRAMMAR")
+				: typed_grammar::base_type(start_, name){}
 
 		protected:
-			void initialize_symbols_();
-
 			rule_type start_;
-			symbols_type symbols_;
-			rule_list_type rule_list_;
+		};
+
+		class grammar : public typed_grammar<oosl::node::object::ptr_type>{
+		public:
+			typedef typed_grammar<oosl::node::object::ptr_type> base_type;
+
+			explicit grammar(const std::string &name = "OOSL_GENERIC_GRAMMAR");
 		};
 	}
 }

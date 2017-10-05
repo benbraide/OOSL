@@ -27,6 +27,7 @@ namespace oosl{
 			writer_not_found,
 			bad_constant,
 			bad_char,
+			bad_range,
 			bad_integer,
 			number_too_big,
 			invalid_suffix,

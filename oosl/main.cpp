@@ -8,7 +8,7 @@
 #include "lexer/literal_grammar.h"
 
 int main(){
-	oosl::lexer::skipper skipper;
+	/*oosl::lexer::skipper skipper;
 	oosl::lexer::literal_grammar gram;
 
 	std::vector<OOSL_AST_QNAME(lit)> ast_list;
@@ -24,7 +24,7 @@ int main(){
 
 		for (auto nod : node_list)
 			std::cout << nod->print() << std::endl;
-	}
+	}*/
 
 	typedef oosl::common::interactive<std::string> interactive_type;
 	interactive_type io;

@@ -3,25 +3,32 @@
 #ifndef OOSL_OPERATOR_GRAMMAR_H
 #define OOSL_OPERATOR_GRAMMAR_H
 
-#include "operator_ast.h"
+#include "grammar.h"
+
+#include "../common/operator_info.h"
 
 #define OOSL_AST_OPERATOR_EXCLUDES "()[]{}\"'`\\,;:$_"
 
 namespace oosl{
 	namespace lexer{
-		template <class ast_type, oosl::common::operator_id id>
-		class operator_grammar : public boost::spirit::qi::grammar<const char *, ast_type(), skipper>{
+		template <oosl::common::operator_id id>
+		class operator_grammar : public typed_grammar<oosl::common::operator_info>{
 		public:
-			typedef const char *iterator_type;
+			typedef typed_grammar<oosl::common::operator_info> base_type;
+
+			typedef oosl::common::operator_info operator_info;
 			typedef oosl::common::operator_id operator_id_type;
 
-			typedef boost::spirit::qi::rule<iterator_type, ast_type(), skipper> start_rule_type;
 			typedef boost::spirit::qi::symbols<char, operator_id_type> operator_id_symbols_type;
 
 			operator_grammar()
-				: operator_grammar::base_type(start_, "OOSL_OPERATOR"){
+				: base_type("OOSL_OPERATOR"){
 				using namespace boost::spirit;
-				start_ %= symbols_ >> qi::omit[qi::no_skip[!(qi::punct - qi::char_(OOSL_AST_OPERATOR_EXCLUDES))]];
+
+				if (id != operator_id_type::unknown)//Known
+					start_ = symbols_[qi::_val = boost::phoenix::bind(&create_known, qi::_1)];
+				else//Unknown
+					start_ = qi::as_string[qi::lexeme[+(qi::punct - qi::char_(OOSL_AST_OPERATOR_EXCLUDES))]][qi::_val = boost::phoenix::bind(&create_unknown, qi::_1)];
 
 				switch (id){
 				case operator_id_type::nil:
@@ -151,37 +158,34 @@ namespace oosl{
 				}
 			}
 
+			static operator_info create_known(operator_id_type id){
+				return operator_info{ id };
+			}
+
+			static operator_info create_unknown(const std::string &value){
+				return operator_info{ operator_id_type::unknown, value };
+			}
+
 		protected:
-			start_rule_type start_;
 			operator_id_symbols_type symbols_;
 		};
 
-		using member_access_operator_grammar	= operator_grammar<OOSL_AST_OPERATOR_NAME(member_access), oosl::common::operator_id::member_access>;
-		using factor_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(factor), oosl::common::operator_id::times>;
-		using addition_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(addition), oosl::common::operator_id::plus>;
-		using shift_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(shift), oosl::common::operator_id::left_shift>;
-		using relation_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(relation), oosl::common::operator_id::less>;
-		using equality_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(equality), oosl::common::operator_id::equality>;
-		using bitwise_and_operator_grammar		= operator_grammar<OOSL_AST_OPERATOR_NAME(bitwise_and), oosl::common::operator_id::bitwise_and>;
-		using bitwise_xor_operator_grammar		= operator_grammar<OOSL_AST_OPERATOR_NAME(bitwise_xor), oosl::common::operator_id::bitwise_xor>;
-		using bitwise_or_operator_grammar		= operator_grammar<OOSL_AST_OPERATOR_NAME(bitwise_or), oosl::common::operator_id::bitwise_or>;
-		using and_operator_grammar				= operator_grammar<OOSL_AST_OPERATOR_NAME(and), oosl::common::operator_id::relational_and>;
-		using or_operator_grammar				= operator_grammar<OOSL_AST_OPERATOR_NAME(or), oosl::common::operator_id::relational_or>;
-		using comma_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(comma), oosl::common::operator_id::comma>;
-		using ternary_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(ternary), oosl::common::operator_id::ternary>;
-		using assignment_operator_grammar		= operator_grammar<OOSL_AST_OPERATOR_NAME(assignment), oosl::common::operator_id::assignment>;
-		using known_operator_grammar			= operator_grammar<OOSL_AST_OPERATOR_NAME(known), oosl::common::operator_id::nil>;
-
-		class unknown_operator_grammar : public boost::spirit::qi::grammar<const char *, OOSL_AST_OPERATOR_NAME(unknown)(), skipper>{
-		public:
-			typedef const char *iterator_type;
-			typedef boost::spirit::qi::rule<iterator_type, OOSL_AST_OPERATOR_NAME(unknown)(), skipper> start_rule_type;
-
-			unknown_operator_grammar();
-
-		protected:
-			start_rule_type start_;
-		};
+		using member_access_operator_grammar	= operator_grammar<oosl::common::operator_id::member_access>;
+		using factor_operator_grammar			= operator_grammar<oosl::common::operator_id::times>;
+		using addition_operator_grammar			= operator_grammar<oosl::common::operator_id::plus>;
+		using shift_operator_grammar			= operator_grammar<oosl::common::operator_id::left_shift>;
+		using relation_operator_grammar			= operator_grammar<oosl::common::operator_id::less>;
+		using equality_operator_grammar			= operator_grammar<oosl::common::operator_id::equality>;
+		using bitwise_and_operator_grammar		= operator_grammar<oosl::common::operator_id::bitwise_and>;
+		using bitwise_xor_operator_grammar		= operator_grammar<oosl::common::operator_id::bitwise_xor>;
+		using bitwise_or_operator_grammar		= operator_grammar<oosl::common::operator_id::bitwise_or>;
+		using and_operator_grammar				= operator_grammar<oosl::common::operator_id::relational_and>;
+		using or_operator_grammar				= operator_grammar<oosl::common::operator_id::relational_or>;
+		using comma_operator_grammar			= operator_grammar<oosl::common::operator_id::comma>;
+		using ternary_operator_grammar			= operator_grammar<oosl::common::operator_id::ternary>;
+		using assignment_operator_grammar		= operator_grammar<oosl::common::operator_id::assignment>;
+		using known_operator_grammar			= operator_grammar<oosl::common::operator_id::nil>;
+		using unknown_operator_grammar			= operator_grammar<oosl::common::operator_id::unknown>;
 	}
 }
 

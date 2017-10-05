@@ -19,7 +19,11 @@ bool oosl::node::object::is(id_type id){
 	return (id == this->id());
 }
 
-std::string oosl::node::object::print(){
+void oosl::node::object::echo(){
+	echo(common::controller::active->output_writer(output_writer_key_type::nil));
+}
+
+void oosl::node::object::echo(output_writer_type &writer){
 	throw error_type::not_implemented;
 }
 
@@ -46,6 +50,10 @@ oosl::node::object::type_object_type *oosl::node::object::type(){
 	auto &run_info = common::controller::active->runtime_info();
 	auto value = run_info.storage->find(key(), run_info.find_type);
 	return ((value == nullptr) ? nullptr : value->type());
+}
+
+oosl::node::object::size_type oosl::node::object::count(){
+	return 1u;
 }
 
 oosl::node::object::entry_type *oosl::node::object::evaluate_(){

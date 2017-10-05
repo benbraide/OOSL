@@ -10,6 +10,7 @@
 
 #include "../common/raii.h"
 #include "../common/controller.h"
+#include "../common/output_writer.h"
 
 #include "node_id.h"
 #include "node_index.h"
@@ -22,10 +23,15 @@ namespace oosl{
 			typedef index index_type;
 
 			typedef oosl::type::object type_object_type;
-			typedef oosl::storage::object storage_type;
+			typedef type_object_type::size_type size_type;
 
+			typedef oosl::storage::object storage_type;
 			typedef storage_type::entry_type entry_type;
+
 			typedef oosl::common::error_codes error_type;
+			typedef common::output_writer output_writer_type;
+			typedef output_writer_type::write_option_type write_option_type;
+			typedef oosl::common::controller::output_writer_key_type output_writer_key_type;
 
 			typedef std::shared_ptr<object> ptr_type;
 
@@ -39,7 +45,9 @@ namespace oosl{
 
 			virtual bool is(id_type id);
 
-			virtual std::string print();
+			virtual void echo();
+
+			virtual void echo(output_writer_type &writer);
 
 			virtual std::string key();
 
@@ -48,6 +56,8 @@ namespace oosl{
 			virtual storage_type *storage();
 
 			virtual type_object_type *type();
+
+			virtual size_type count();
 
 		protected:
 			virtual entry_type *evaluate_();

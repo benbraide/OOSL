@@ -9,6 +9,11 @@
 
 namespace oosl{
 	namespace common{
+		struct operator_info{
+			operator_id id;
+			std::string value;
+		};
+
 		struct binary_operator_info{
 			operator_id id;
 			std::string value;

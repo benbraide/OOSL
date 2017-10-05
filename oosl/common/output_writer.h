@@ -3,6 +3,8 @@
 #ifndef OOSL_OUTPUT_WRITER_H
 #define OOSL_OUTPUT_WRITER_H
 
+#include <string>
+
 #include "preprocessor.h"
 
 namespace oosl{
@@ -21,7 +23,15 @@ namespace oosl{
 
 			virtual void end() = 0;
 
+			virtual void write(const std::string &value, write_option_type options = write_option_type::nil){
+				write(value.c_str(), options);
+			}
+
 			virtual void write(const char *value, write_option_type options = write_option_type::nil) = 0;
+
+			virtual void write(const std::wstring &value, write_option_type options = write_option_type::nil){
+				write(value.c_str(), options);
+			}
 
 			virtual void write(const wchar_t *value, write_option_type options = write_option_type::nil) = 0;
 		};

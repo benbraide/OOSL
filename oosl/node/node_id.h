@@ -10,6 +10,7 @@ namespace oosl{
 			literal_,
 			constant,
 			integral,
+			range,
 			operator_,
 			identifier,
 			qualified,
