@@ -50,7 +50,7 @@ namespace oosl{
 			system_call_grammar system_call_;
 			grouped_expression_grammar_type grouped_expression_;
 			list_expression_grammar_type list_expression_;
-			primitive_type_grammar primitive_type_;
+			type_grammar type_;
 		};
 
 		class term_grammar : public grammar{
@@ -73,13 +73,17 @@ namespace oosl{
 		public:
 			grouped_expression_grammar();
 
-		protected:
+			static node_ptr_type create(node_ptr_type value);
 
+		protected:
+			expression_grammar expression_;
 		};
 
 		class list_expression_grammar : public grammar{
 		public:
 			list_expression_grammar();
+
+			static node_ptr_type create(node_ptr_type value);
 
 		protected:
 

@@ -125,8 +125,8 @@ oosl::lexer::relative_qualified_grammar::relative_qualified_grammar()
 	using namespace boost::spirit;
 
 	start_ =
-		   (absolute_qualified_ | identifier_)	[qi::_val = qi::_1]
-		>> +("::" >> identifier_)				[qi::_val = boost::phoenix::bind(&create, qi::_val, qi::_1)];
+		(absolute_qualified_ | identifier_)[qi::_val = qi::_1]
+		>> +("::" >> identifier_)[qi::_val = boost::phoenix::bind(&create, qi::_val, qi::_1)];
 }
 
 oosl::lexer::grammar::node_ptr_type oosl::lexer::relative_qualified_grammar::create(node_ptr_type left, node_ptr_type right){
@@ -178,7 +178,7 @@ oosl::lexer::system_call_grammar::system_call_grammar()
 	: grammar("OOSL_SYSTEM_CALL"){
 	using namespace boost::spirit;
 
-	start_ = ("__call" > qi::lit("(") > qi::uint_ > ")")[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+	start_ = ("__call" > qi::lit("(") > qi::uint_ > ')')[qi::_val = boost::phoenix::bind(&create, qi::_1)];
 }
 
 oosl::lexer::grammar::node_ptr_type oosl::lexer::system_call_grammar::create(unsigned int value){

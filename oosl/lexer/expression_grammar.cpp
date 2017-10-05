@@ -103,7 +103,7 @@ oosl::lexer::non_operator_term_grammar::non_operator_term_grammar()
 	grouped_expression_ = std::make_shared<grouped_expression_grammar>();
 	list_expression_ = std::make_shared<list_expression_grammar>();
 
-	start_ %= (literal_ | constant_ | system_call_ | identifier_compatible_ | primitive_type_ | (*grouped_expression_) | (*list_expression_));
+	start_ %= (literal_ | constant_ | system_call_ | type_ | identifier_compatible_ | (*grouped_expression_) | (*list_expression_));
 }
 
 oosl::lexer::expression_grammar::expression_grammar()
@@ -113,7 +113,29 @@ oosl::lexer::expression_grammar::expression_grammar()
 
 oosl::lexer::grouped_expression_grammar::grouped_expression_grammar()
 	: grammar("OOSL_GROUPED_EXPRESSION"){
+	using namespace boost::spirit;
 
+	start_ = ('(' >> expression_ >> ')')[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::grouped_expression_grammar::create(node_ptr_type value){
+	typedef oosl::node::inplace<node_ptr_type> inplace_type;
+	return std::make_shared<inplace_type>(node_id_type::range, [](inplace_type &owner, inplace_target_type target, void *out) -> bool{
+		switch (target){
+		case inplace_target_type::eval:
+			*reinterpret_cast<entry_type **>(out) = owner.value()->evaluate();
+			return true;
+		case inplace_target_type::print:
+			reinterpret_cast<output_writer_type *>(out)->write("(");
+			owner.value()->echo(*reinterpret_cast<output_writer_type *>(out));
+			reinterpret_cast<output_writer_type *>(out)->write(")");
+			return true;
+		default:
+			break;
+		}
+
+		return false;
+	}, value);
 }
 
 oosl::lexer::list_expression_grammar::list_expression_grammar()
