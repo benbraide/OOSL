@@ -61,31 +61,56 @@ namespace oosl{
 			decltype_grammar decltype_;
 		};
 
+		class pointer_type_grammar : public grammar{
+		public:
+			pointer_type_grammar();
+
+			static node_ptr_type create(node_ptr_type value, const std::string &dim);
+
+		protected:
+			type_grammar type_;
+			identifier_compatible_grammar identifier_compatible_;
+		};
+
+		class ref_type_grammar : public grammar{
+		public:
+			ref_type_grammar();
+
+			static node_ptr_type create(node_ptr_type value);
+
+		protected:
+			type_grammar type_;
+			identifier_compatible_grammar identifier_compatible_;
+			pointer_type_grammar pointer_type_;
+		};
+
+		class rval_ref_type_grammar : public grammar{
+		public:
+			rval_ref_type_grammar();
+
+			static node_ptr_type create(node_ptr_type value);
+
+		protected:
+			type_grammar type_;
+			identifier_compatible_grammar identifier_compatible_;
+			pointer_type_grammar pointer_type_;
+		};
+
 		class modified_type_grammar : public grammar{
 		public:
 			modified_type_grammar();
 
-			static node_ptr_type create_ref(node_ptr_type value);
-
-			static node_ptr_type create_pointer(node_ptr_type value, const std::string &dim);
-
 		protected:
-			rule_type ref_;
-			rule_type pointer_;
-			type_grammar type_;
-			identifier_compatible_grammar identifier_compatible_;
+			ref_type_grammar ref_;
+			pointer_type_grammar pointer_;
 		};
 
 		class full_modified_type_grammar : public grammar{
 		public:
 			full_modified_type_grammar();
 
-			static node_ptr_type create(node_ptr_type value);
-
 		protected:
-			rule_type rval_ref_;
-			type_grammar type_;
-			identifier_compatible_grammar identifier_compatible_;
+			rval_ref_type_grammar rval_ref_;
 			modified_type_grammar modified_type_;
 		};
 
@@ -116,6 +141,37 @@ namespace oosl{
 			type_grammar type_;
 			identifier_compatible_grammar identifier_compatible_;
 			modified_type_grammar modified_type_;
+		};
+
+		class variadic_type_grammar : public grammar{
+		public:
+			variadic_type_grammar();
+
+			static node_ptr_type create(node_ptr_type value);
+
+		protected:
+			type_grammar type_;
+			identifier_compatible_grammar identifier_compatible_;
+			full_modified_type_grammar modified_type_;
+		};
+
+		class function_type_grammar : public grammar{
+		public:
+			typedef std::vector<node_ptr_type> node_ptr_list_type;
+
+			function_type_grammar();
+
+			static node_ptr_type create(node_ptr_type return_type, const std::string &dim, boost::optional<char> ref_char,
+				const node_ptr_list_type &params, boost::optional<node_ptr_type> variadic);
+
+		protected:
+			rule_type return_type_;
+			rule_type param_type_;
+			type_grammar type_;
+			identifier_compatible_grammar identifier_compatible_;
+			modified_type_grammar modified_type_;
+			full_modified_type_grammar full_modified_type_;
+			variadic_type_grammar variadic_type_;
 		};
 	}
 }

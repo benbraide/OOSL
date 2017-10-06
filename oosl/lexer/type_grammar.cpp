@@ -121,46 +121,14 @@ oosl::lexer::type_grammar::type_grammar()
 	start_ %= (primitive_type_ | decltype_);
 }
 
-oosl::lexer::modified_type_grammar::modified_type_grammar()
-	: grammar("OOSL_MODIFIED_TYPE"){
+oosl::lexer::pointer_type_grammar::pointer_type_grammar()
+	: grammar("OOSL_POINTER_TYPE"){
 	using namespace boost::spirit;
 
-	ref_ = ((type_ | identifier_compatible_) >> '&')[qi::_val = boost::phoenix::bind(&create_ref, qi::_1)];
-	pointer_ = ((type_ | identifier_compatible_) >> qi::as_string[+qi::char_('*')])[qi::_val = boost::phoenix::bind(&create_pointer, qi::_1, qi::_2)];
-
-	start_ %= (ref_ | pointer_);
+	start_ = ((type_ | identifier_compatible_) >> qi::as_string[+qi::char_('*')])[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2)];
 }
 
-oosl::lexer::grammar::node_ptr_type oosl::lexer::modified_type_grammar::create_ref(node_ptr_type value){
-	typedef oosl::node::inplace<std::pair<node_ptr_type, type_ptr_type>> node_type;
-
-	return std::make_shared<node_type>(node_id_type::type, [](node_type &owner, inplace_target_type target, void *out) -> bool{
-		switch (target){
-		case inplace_target_type::eval:
-			*reinterpret_cast<entry_type **>(out) = oosl::common::controller::active->temporary_storage().add_scalar(*owner.type());
-			return true;
-		case inplace_target_type::print:
-			owner.value().first->echo(*reinterpret_cast<output_writer_type *>(out));
-			reinterpret_cast<output_writer_type *>(out)->write("&");
-			return true;
-		case inplace_target_type::type:
-			break;
-		default:
-			return false;
-		}
-
-		auto &value = owner.value();
-		if (value.second == nullptr){//Evaluate
-			auto underlying_type = value.first->type();
-			value.second = std::make_shared<oosl::type::modified>(underlying_type->reflect(), type_object_type::attribute::ref);
-		}
-
-		*reinterpret_cast<type_object_type **>(out) = value.second.get();
-		return true;
-	}, std::make_pair(value, nullptr));
-}
-
-oosl::lexer::grammar::node_ptr_type oosl::lexer::modified_type_grammar::create_pointer(node_ptr_type value, const std::string &dim){
+oosl::lexer::grammar::node_ptr_type oosl::lexer::pointer_type_grammar::create(node_ptr_type value, const std::string &dim){
 	typedef oosl::node::inplace<std::pair<node_ptr_type, type_ptr_type>> node_type;
 
 	return std::make_shared<node_type>(node_id_type::type, [dim](node_type &owner, inplace_target_type target, void *out) -> bool{
@@ -190,16 +158,14 @@ oosl::lexer::grammar::node_ptr_type oosl::lexer::modified_type_grammar::create_p
 	}, std::make_pair(value, nullptr));
 }
 
-oosl::lexer::full_modified_type_grammar::full_modified_type_grammar()
-	: grammar("OOSL_FULL_MODIFIED_TYPE"){
+oosl::lexer::ref_type_grammar::ref_type_grammar()
+	: grammar("OOSL_REF_TYPE"){
 	using namespace boost::spirit;
 
-	rval_ref_ = ((type_ | identifier_compatible_) >> "&&")[qi::_val = boost::phoenix::bind(&create, qi::_1)];
-
-	start_ %= (rval_ref_ | modified_type_);
+	start_ = ((pointer_type_ | type_ | identifier_compatible_) >> '&')[qi::_val = boost::phoenix::bind(&create, qi::_1)];
 }
 
-oosl::lexer::grammar::node_ptr_type oosl::lexer::full_modified_type_grammar::create(node_ptr_type value){
+oosl::lexer::grammar::node_ptr_type oosl::lexer::ref_type_grammar::create(node_ptr_type value){
 	typedef oosl::node::inplace<std::pair<node_ptr_type, type_ptr_type>> node_type;
 
 	return std::make_shared<node_type>(node_id_type::type, [](node_type &owner, inplace_target_type target, void *out) -> bool{
@@ -207,6 +173,39 @@ oosl::lexer::grammar::node_ptr_type oosl::lexer::full_modified_type_grammar::cre
 		case inplace_target_type::eval:
 			*reinterpret_cast<entry_type **>(out) = oosl::common::controller::active->temporary_storage().add_scalar(*owner.type());
 			return true;
+		case inplace_target_type::print:
+			owner.value().first->echo(*reinterpret_cast<output_writer_type *>(out));
+			reinterpret_cast<output_writer_type *>(out)->write("&");
+			return true;
+		case inplace_target_type::type:
+			break;
+		default:
+			return false;
+		}
+
+		auto &value = owner.value();
+		if (value.second == nullptr){//Evaluate
+			auto underlying_type = value.first->type();
+			value.second = std::make_shared<oosl::type::modified>(underlying_type->reflect(), type_object_type::attribute::ref);
+		}
+
+		*reinterpret_cast<type_object_type **>(out) = value.second.get();
+		return true;
+	}, std::make_pair(value, nullptr));
+}
+
+oosl::lexer::rval_ref_type_grammar::rval_ref_type_grammar()
+	: grammar("OOSL_RVAL_REF_TYPE"){
+	using namespace boost::spirit;
+
+	start_ = ((pointer_type_ | type_ | identifier_compatible_) >> "&&")[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::rval_ref_type_grammar::create(node_ptr_type value){
+	typedef oosl::node::inplace<std::pair<node_ptr_type, type_ptr_type>> node_type;
+
+	return std::make_shared<node_type>(node_id_type::type, [](node_type &owner, inplace_target_type target, void *out) -> bool{
+		switch (target){
 		case inplace_target_type::print:
 			owner.value().first->echo(*reinterpret_cast<output_writer_type *>(out));
 			reinterpret_cast<output_writer_type *>(out)->write("&&");
@@ -228,11 +227,21 @@ oosl::lexer::grammar::node_ptr_type oosl::lexer::full_modified_type_grammar::cre
 	}, std::make_pair(value, nullptr));
 }
 
+oosl::lexer::modified_type_grammar::modified_type_grammar()
+	: grammar("OOSL_MODIFIED_TYPE"){
+	start_ %= (ref_ | pointer_);
+}
+
+oosl::lexer::full_modified_type_grammar::full_modified_type_grammar()
+	: grammar("OOSL_FULL_MODIFIED_TYPE"){
+	start_ %= (rval_ref_ | modified_type_);
+}
+
 oosl::lexer::typename_type_grammar::typename_type_grammar()
 	: grammar("OOSL_TYPENAME_TYPE"){
 	using namespace boost::spirit;
 
-	start_ = ("typename" > (type_ | modified_type_ | identifier_compatible_))[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+	start_ = ("typename" > (modified_type_ | type_ | identifier_compatible_))[qi::_val = boost::phoenix::bind(&create, qi::_1)];
 }
 
 oosl::lexer::grammar::node_ptr_type oosl::lexer::typename_type_grammar::create(node_ptr_type value){
@@ -259,7 +268,7 @@ oosl::lexer::specified_type_grammar::specified_type_grammar()
 	: grammar("OOSL_SPECIFIED_TYPE"){
 	using namespace boost::spirit;
 
-	start_ = (type_specifier_ > (type_ | modified_type_ | identifier_compatible_))[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2)];
+	start_ = (type_specifier_ > (modified_type_ | type_ | identifier_compatible_))[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2)];
 }
 
 oosl::lexer::grammar::node_ptr_type oosl::lexer::specified_type_grammar::create(type_attribute_type attributes, node_ptr_type value){
@@ -304,4 +313,54 @@ std::string oosl::lexer::specified_type_grammar::print_attributes(type_attribute
 		string_value += "thread_local ";
 
 	return string_value;
+}
+
+oosl::lexer::variadic_type_grammar::variadic_type_grammar()
+	: grammar("OOSL_VARIADIC_TYPE"){
+	using namespace boost::spirit;
+
+	start_ = ((modified_type_ | type_ | identifier_compatible_) >> "...")[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::variadic_type_grammar::create(node_ptr_type value){
+	typedef oosl::node::inplace<std::pair<node_ptr_type, type_ptr_type>> node_type;
+
+	return std::make_shared<node_type>(node_id_type::type, [](node_type &owner, inplace_target_type target, void *out) -> bool{
+		switch (target){
+		case inplace_target_type::print:
+			owner.value().first->echo(*reinterpret_cast<output_writer_type *>(out));
+			reinterpret_cast<output_writer_type *>(out)->write("...");
+			return true;
+		case inplace_target_type::type:
+			break;
+		default:
+			return false;
+		}
+
+		auto &value = owner.value();
+		if (value.second == nullptr){//Evaluate
+			auto underlying_type = value.first->type();
+			//value.second = std::make_shared<oosl::type::variadic>(underlying_type->reflect());
+		}
+
+		*reinterpret_cast<type_object_type **>(out) = value.second.get();
+		return true;
+	}, std::make_pair(value, nullptr));
+}
+
+oosl::lexer::function_type_grammar::function_type_grammar()
+	: grammar("OOSL_FUNCTION_TYPE"){
+	using namespace boost::spirit;
+
+	return_type_ %= (modified_type_ | type_ | identifier_compatible_);
+	param_type_ %= (full_modified_type_ | type_ | identifier_compatible_);
+
+	start_ =
+		(return_type_ >> '(' >> qi::as_string[+qi::char_('*')] >> -qi::char_('&') >> ')' >> qi::lit("(") >> *(',' >> param_type_) >> -(',' >> variadic_type_) >> ')')
+		[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2, qi::_3, qi::_4, qi::_5)];
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::function_type_grammar::create(node_ptr_type return_type, const std::string &dim, boost::optional<char> ref_char,
+	const node_ptr_list_type &params, boost::optional<node_ptr_type> variadic){
+	return nullptr;
 }

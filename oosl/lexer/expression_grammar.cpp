@@ -106,6 +106,11 @@ oosl::lexer::non_operator_term_grammar::non_operator_term_grammar()
 	start_ %= (literal_ | constant_ | system_call_ | type_ | identifier_compatible_ | (*grouped_expression_) | (*list_expression_));
 }
 
+oosl::lexer::non_list_expression_grammar::non_list_expression_grammar()
+	: grammar("OOSL_NON_LIST_EXPRESSION"){
+
+}
+
 oosl::lexer::expression_grammar::expression_grammar()
 	: grammar("OOSL_EXPRESSION"){
 

@@ -61,6 +61,14 @@ namespace oosl{
 			non_operator_term_grammar non_operator_term_;
 		};
 
+		class non_list_expression_grammar : public grammar{
+		public:
+			non_list_expression_grammar();
+
+		protected:
+
+		};
+
 		class expression_grammar : public grammar{
 		public:
 			expression_grammar();
