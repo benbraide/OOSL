@@ -76,7 +76,7 @@ oosl::lexer::rad_literal_grammar::rad_literal_grammar()
 	: grammar("OOSL_RAD_LITERAL"){
 	using namespace boost::spirit;
 
-	start_ = qi::lexeme[(qi::int_ >> 'r' >> qi::as_string[+qi::alnum] >> -suffix_symbols_)[qi::_val = boost::phoenix::bind(&numeric_helper::make_rad_node, qi::_1, qi::_2, qi::_3)]];
+	start_ = qi::lexeme[(qi::int_ >> 'r' >> qi::as_string[+qi::alnum] >> -(suffix_symbols_ >> !qi::char_("$_A-Za-z0-9")))[qi::_val = boost::phoenix::bind(&numeric_helper::make_rad_node, qi::_1, qi::_2, qi::_3)]];
 
 	suffix_symbols_.add
 		("i8", integral_suffix_type::i8)
@@ -95,7 +95,7 @@ oosl::lexer::integer_literal_grammar::integer_literal_grammar()
 	: grammar("OOSL_INTEGER_LITERAL"){
 	using namespace boost::spirit;
 
-	start_ = qi::lexeme[(qi::long_long >> -suffix_symbols_)[qi::_val = boost::phoenix::bind(&numeric_helper::make_int_node, qi::_1, qi::_2)]];
+	start_ = qi::lexeme[(qi::long_long >> -(suffix_symbols_ >> !qi::char_("$_A-Za-z0-9")))[qi::_val = boost::phoenix::bind(&numeric_helper::make_int_node, qi::_1, qi::_2)]];
 
 	suffix_symbols_.add
 		("i8", integral_suffix_type::i8)
@@ -114,7 +114,7 @@ oosl::lexer::real_literal_grammar::real_literal_grammar()
 	: grammar("OOSL_REAL_LITERAL"){
 	using namespace boost::spirit;
 
-	start_ = qi::lexeme[(real_parser_ >> -suffix_symbols_)[qi::_val = boost::phoenix::bind(&numeric_helper::make_real_node, qi::_1, qi::_2)]];
+	start_ = qi::lexeme[(real_parser_ >> -(suffix_symbols_ >> !qi::char_("$_A-Za-z0-9")))[qi::_val = boost::phoenix::bind(&numeric_helper::make_real_node, qi::_1, qi::_2)]];
 
 	suffix_symbols_.add
 		("f32", real_suffix_type::f32)

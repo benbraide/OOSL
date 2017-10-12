@@ -1,11 +1,102 @@
 #include "general_grammar.h"
 #include "expression_grammar.h"
 
+oosl::lexer::keyword_grammar::keyword_grammar()
+	: grammar("OOSL_KEYWORD"){
+	using namespace boost::spirit;
+
+	start_ = keyword(symbols_)[qi::_val = create()];//(symbols_ >> !qi::char_("$_A-Za-z0-9"));
+
+	symbols_.add
+		("module")
+		("export")
+		("import")
+		("void")
+		("any")
+		("auto")
+		("bool")
+		("byte")
+		("char")
+		("wchar")
+		("int8")
+		("uint8")
+		("int16")
+		("uint16")
+		("int32")
+		("uint32")
+		("int64")
+		("uint64")
+		("int128")
+		("uint128")
+		("float32")
+		("float64")
+		("float128")
+		("string")
+		("wstring")
+		("enum")
+		("union")
+		("struct")
+		("class")
+		("namespace")
+		("ref")
+		("array_t")
+		("pointer_t")
+		("function_t")
+		("nullptr_t")
+		("nan_t")
+		("type_t")
+		("node_t")
+		("storage_t")
+		("decltype")
+		("static_cast")
+		("reinterpret_cast")
+		("static")
+		("thread_local")
+		("true")
+		("false")
+		("indeterminate")
+		("nullptr")
+		("NaN")
+		("using")
+		("typedef")
+		("operator")
+		("sizeof")
+		("typeof")
+		("echo")
+		("if")
+		("else")
+		("unless")
+		("while")
+		("do")
+		("until")
+		("for")
+		("switch")
+		("case")
+		("default")
+		("break")
+		("continue")
+		("return")
+		("throw")
+		("try")
+		("catch")
+		("finally")
+		("new")
+		("delete")
+		("self")
+		("__placeholder")
+		("__call");
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::keyword_grammar::create(){
+	return nullptr;
+}
+
 oosl::lexer::identifier_grammar::identifier_grammar()
 	: grammar("OOSL_IDENITIFIER"){
 	using namespace boost::spirit;
 
-	start_ = qi::as_string[qi::lexeme[qi::char_("$_A-Za-z") >> *qi::char_("$_A-Za-z0-9")]][qi::_val = boost::phoenix::bind(&create, qi::_1)];
+	base_ = qi::raw[qi::lexeme[qi::char_("$_A-Za-z") >> *qi::char_("$_A-Za-z0-9")]];
+	start_ = (!keyword_ >> base_)[qi::_val = boost::phoenix::bind(&create, qi::_1)];
 }
 
 oosl::lexer::grammar::node_ptr_type oosl::lexer::identifier_grammar::create(const std::string &value){

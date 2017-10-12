@@ -7,8 +7,6 @@
 
 #include "../common/operator_info.h"
 
-#define OOSL_AST_OPERATOR_EXCLUDES "()[]{}\"'`\\,;:$_"
-
 namespace oosl{
 	namespace lexer{
 		template <oosl::common::operator_id id>
@@ -25,10 +23,14 @@ namespace oosl{
 				: base_type("OOSL_OPERATOR"){
 				using namespace boost::spirit;
 
-				if (id != operator_id_type::unknown)//Known
-					start_ = symbols_[qi::_val = boost::phoenix::bind(&create_known, qi::_1)];
+				if (id != operator_id_type::unknown){//Known
+					if (id == operator_id_type::ternary)
+						start_ = symbols_[qi::_val = boost::phoenix::bind(&create_known, qi::_1)];
+					else//Non-ternary
+						start_ = operator_(symbols_)[qi::_val = boost::phoenix::bind(&create_known, qi::_1)];
+				}
 				else//Unknown
-					start_ = qi::as_string[qi::lexeme[+(qi::punct - qi::char_(OOSL_AST_OPERATOR_EXCLUDES))]][qi::_val = boost::phoenix::bind(&create_unknown, qi::_1)];
+					start_ = qi::as_string[qi::lexeme[+qi::char_("~!@#%^&*-+<>=")]][qi::_val = boost::phoenix::bind(&create_unknown, qi::_1)];
 
 				switch (id){
 				case operator_id_type::nil:
@@ -68,7 +70,7 @@ namespace oosl{
 						("&", operator_id_type::bitwise_and)
 						("^", operator_id_type::bitwise_xor)
 						("|", operator_id_type::bitwise_or)
-						("~", operator_id_type::bitwise_not)
+						("~", operator_id_type::bitwise_inverse)
 						("!", operator_id_type::relational_not)
 						(",", operator_id_type::comma)
 						("new", operator_id_type::new_)
@@ -133,12 +135,7 @@ namespace oosl{
 					break;
 				case operator_id_type::comma:
 					symbols_.add
-						(",", operator_id_type::comma);
-					break;
-				case operator_id_type::ternary:
-					symbols_.add
-						("?", operator_id_type::ternary);
-					break;
+						(",", operator_id_type::comma);//Fall through
 				case operator_id_type::assignment:
 					symbols_.add
 						("<<=", operator_id_type::compound_left_shift)
@@ -152,6 +149,10 @@ namespace oosl{
 						("^=", operator_id_type::compound_bitwise_xor)
 						("|=", operator_id_type::compound_bitwise_or)
 						("=", operator_id_type::assignment);
+					break;
+				case operator_id_type::ternary:
+					symbols_.add
+					("?", operator_id_type::ternary);
 					break;
 				default:
 					break;
@@ -182,8 +183,8 @@ namespace oosl{
 		using and_operator_grammar				= operator_grammar<oosl::common::operator_id::relational_and>;
 		using or_operator_grammar				= operator_grammar<oosl::common::operator_id::relational_or>;
 		using comma_operator_grammar			= operator_grammar<oosl::common::operator_id::comma>;
-		using ternary_operator_grammar			= operator_grammar<oosl::common::operator_id::ternary>;
 		using assignment_operator_grammar		= operator_grammar<oosl::common::operator_id::assignment>;
+		using ternary_operator_grammar			= operator_grammar<oosl::common::operator_id::ternary>;
 		using known_operator_grammar			= operator_grammar<oosl::common::operator_id::nil>;
 		using unknown_operator_grammar			= operator_grammar<oosl::common::operator_id::unknown>;
 	}

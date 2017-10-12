@@ -7,13 +7,31 @@
 
 namespace oosl{
 	namespace lexer{
+		class keyword_grammar : public grammar{
+		public:
+			typedef boost::spirit::qi::symbols<char> symbols_type;
+
+			keyword_grammar();
+
+			static node_ptr_type create();
+
+		protected:
+			symbols_type symbols_;
+		};
+
 		class identifier_grammar : public grammar{
 		public:
+			typedef boost::spirit::qi::rule<iterator_type, std::string(), skipper> custom_rule_type;
+
 			identifier_grammar();
 
 			static node_ptr_type create(const std::string &value);
 
 			static entry_type *lookup(const std::string &key);
+
+		protected:
+			custom_rule_type base_;
+			keyword_grammar keyword_;
 		};
 
 		class placeholder_grammar : public grammar{

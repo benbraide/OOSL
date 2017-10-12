@@ -4,7 +4,7 @@ oosl::lexer::constant_grammar::constant_grammar()
 	: grammar("OOSL_CONSTANT"){
 	using namespace boost::spirit;
 
-	start_ = constant_symbols_[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+	start_ = keyword(constant_symbols_)[qi::_val = boost::phoenix::bind(&create, qi::_1)];
 
 	constant_symbols_.add
 		("false", constant_type::false_)

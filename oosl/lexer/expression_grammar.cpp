@@ -106,14 +106,73 @@ oosl::lexer::non_operator_term_grammar::non_operator_term_grammar()
 	start_ %= (literal_ | constant_ | system_call_ | type_ | identifier_compatible_ | (*grouped_expression_) | (*list_expression_));
 }
 
+oosl::lexer::right_unary_term_grammar::right_unary_term_grammar()
+	: grammar("OOSL_RIGHT_UNARY_TERM"){
+	using namespace boost::spirit;
+
+	non_list_expression_ = std::make_shared<non_list_expression_grammar>();
+	expression_ = std::make_shared<expression_grammar>();
+
+	member_access_ = (member_access_operator_ >> identifier_compatible_)[qi::_val = boost::phoenix::bind(&create_member_access, qi::_1, qi::_2)];
+	call_ = ('(' > -((*non_list_expression_) % ",") > ')')[qi::_val = boost::phoenix::bind(&create_call, qi::_1)];
+	index_ = ('[' > -(*expression_) > ']')[qi::_val = boost::phoenix::bind(&create_index, qi::_1)];
+
+	start_ = (
+		non_operator_term_[qi::_val = qi::_1]
+		>> *(member_access_ | call_ | index_)[qi::_val = boost::phoenix::bind(&create, qi::_val, qi::_1)]
+		);
+}
+
+oosl::lexer::right_unary_term_grammar::member_access_info oosl::lexer::right_unary_term_grammar::create_member_access(const operator_info &info, node_ptr_type value){
+	return member_access_info{ info, value };
+}
+
+oosl::lexer::right_unary_term_grammar::member_access_info oosl::lexer::right_unary_term_grammar::create_call(boost::optional<node_ptr_list_type> value){
+	//value.value_or(nullptr);
+	return member_access_info{ operator_info{ operator_id_type::index }, nullptr };
+}
+
+oosl::lexer::right_unary_term_grammar::member_access_info oosl::lexer::right_unary_term_grammar::create_index(boost::optional<node_ptr_type> value){
+	return member_access_info{ operator_info{ operator_id_type::index }, value.value_or(nullptr) };
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::right_unary_term_grammar::create(node_ptr_type left, const member_access_info &right){
+	return nullptr;
+}
+
+oosl::lexer::term_grammar::term_grammar()
+	: grammar("OOSL_TERM"){
+	using namespace boost::spirit;
+
+	base_ = ((known_operator_ | unknown_operator_) >> right_unary_term_)[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2)];
+
+	start_ %= (right_unary_term_ | base_);
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::term_grammar::create(const operator_info &info, node_ptr_type value){
+	return nullptr;
+}
+
+oosl::lexer::expression_helper::node_ptr_type oosl::lexer::expression_helper::create(node_ptr_type left, const expression_extension &ext){
+	return nullptr;
+}
+
+oosl::lexer::term_grammar oosl::lexer::expression_helper::term_;
+
+oosl::lexer::right_unary_term_grammar oosl::lexer::expression_helper::right_unary_term_;
+
 oosl::lexer::non_list_expression_grammar::non_list_expression_grammar()
 	: grammar("OOSL_NON_LIST_EXPRESSION"){
+	ternary_expression_ = std::make_shared<ternary_expression_grammar_type>();
 
+	start_ %= expression_helper::parser(*ternary_expression_);
 }
 
 oosl::lexer::expression_grammar::expression_grammar()
 	: grammar("OOSL_EXPRESSION"){
+	ternary_expression_ = std::make_shared<ternary_expression_grammar_type>();
 
+	start_ %= expression_helper::parser(*ternary_expression_);
 }
 
 oosl::lexer::grouped_expression_grammar::grouped_expression_grammar()
@@ -146,4 +205,8 @@ oosl::lexer::grammar::node_ptr_type oosl::lexer::grouped_expression_grammar::cre
 oosl::lexer::list_expression_grammar::list_expression_grammar()
 	: grammar("OOSL_LIST_EXPRESSION"){
 
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::list_expression_grammar::create(node_ptr_type value){
+	return nullptr;
 }
