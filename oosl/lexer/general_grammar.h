@@ -7,6 +7,25 @@
 
 namespace oosl{
 	namespace lexer{
+		class expression_grammar;
+		class non_list_expression_grammar;
+		class variadic_expression_grammar;
+
+		class expression_list_grammar : public grammar{
+		public:
+			typedef std::shared_ptr<non_list_expression_grammar> expression_grammar_type;
+			typedef std::shared_ptr<variadic_expression_grammar> variadic_expression_grammar_type;
+			typedef std::vector<node_ptr_type> node_ptr_list_type;
+
+			expression_list_grammar();
+
+			static node_ptr_type create(const node_ptr_list_type &value);
+
+		protected:
+			expression_grammar_type expression_;
+			variadic_expression_grammar_type variadic_expression_;
+		};
+
 		class keyword_grammar : public grammar{
 		public:
 			typedef boost::spirit::qi::symbols<char> symbols_type;
@@ -36,13 +55,14 @@ namespace oosl{
 
 		class placeholder_grammar : public grammar{
 		public:
+			typedef std::shared_ptr<expression_grammar> expression_grammar_type;
+
 			placeholder_grammar();
 
 			static node_ptr_type create(node_ptr_type value);
 
 		protected:
-			string_literal_grammar string_literal_;
-			identifier_grammar identifier_;
+			expression_grammar_type expression_;
 		};
 
 		class identifier_or_placeholder_grammar : public grammar{
@@ -97,7 +117,10 @@ namespace oosl{
 		public:
 			system_call_grammar();
 
-			static node_ptr_type create(unsigned int value);
+			static node_ptr_type create(unsigned int value, boost::optional<node_ptr_type> args);
+
+		protected:
+			expression_list_grammar expression_list_;
 		};
 	}
 }

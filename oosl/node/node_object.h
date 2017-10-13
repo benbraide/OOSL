@@ -4,6 +4,7 @@
 #define OOSL_NODE_OBJECT_H
 
 #include <memory>
+#include <functional>
 
 #include "../type/type_object.h"
 #include "../storage/storage_object.h"
@@ -34,6 +35,7 @@ namespace oosl{
 			typedef oosl::common::controller::output_writer_key_type output_writer_key_type;
 
 			typedef std::shared_ptr<object> ptr_type;
+			typedef std::function<bool(ptr_type)> traverser_type;
 
 			virtual ~object();
 
@@ -58,6 +60,8 @@ namespace oosl{
 			virtual type_object_type *type();
 
 			virtual size_type count();
+
+			virtual void traverse(traverser_type traverser);
 
 		protected:
 			virtual entry_type *evaluate_();

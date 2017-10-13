@@ -8,6 +8,8 @@
 #include "type_grammar.h"
 #include "operator_grammar.h"
 
+#include "../node/expression_node.h"
+
 namespace oosl{
 	namespace lexer{
 		class range_grammar : public grammar{
@@ -38,10 +40,16 @@ namespace oosl{
 		class list_expression_grammar;
 		class non_list_expression_grammar;
 
+		template <bool reinterpret>
+		class cast_expression_grammar;
+
 		class non_operator_term_grammar : public grammar{
 		public:
 			typedef std::shared_ptr<grouped_expression_grammar> grouped_expression_grammar_type;
 			typedef std::shared_ptr<list_expression_grammar> list_expression_grammar_type;
+
+			typedef std::shared_ptr<cast_expression_grammar<false>> static_cast_expression_grammar_type;
+			typedef std::shared_ptr<cast_expression_grammar<true>> reinterpret_cast_expression_grammar_type;
 
 			non_operator_term_grammar();
 
@@ -52,6 +60,8 @@ namespace oosl{
 			system_call_grammar system_call_;
 			grouped_expression_grammar_type grouped_expression_;
 			list_expression_grammar_type list_expression_;
+			static_cast_expression_grammar_type static_cast_expression_;
+			reinterpret_cast_expression_grammar_type reinterpret_cast_expression_;
 			type_grammar type_;
 		};
 
@@ -59,10 +69,7 @@ namespace oosl{
 		public:
 			typedef oosl::common::operator_info operator_info;
 			typedef oosl::common::operator_id operator_id_type;
-
-			typedef std::shared_ptr<non_list_expression_grammar> non_list_expression_grammar_type;
 			typedef std::shared_ptr<expression_grammar> expression_grammar_type;
-			typedef std::vector<node_ptr_type> node_ptr_list_type;
 
 			struct member_access_info{
 				operator_info info;
@@ -75,7 +82,7 @@ namespace oosl{
 
 			static member_access_info create_member_access(const operator_info &info, node_ptr_type value);
 
-			static member_access_info create_call(boost::optional<node_ptr_list_type> value);
+			static member_access_info create_call(boost::optional<node_ptr_type> value);
 
 			static member_access_info create_index(boost::optional<node_ptr_type> value);
 
@@ -86,10 +93,10 @@ namespace oosl{
 			custom_rule_type call_;
 			custom_rule_type index_;
 			non_operator_term_grammar non_operator_term_;
-			non_list_expression_grammar_type non_list_expression_;
 			member_access_operator_grammar member_access_operator_;
 			identifier_compatible_grammar identifier_compatible_;
 			expression_grammar_type expression_;
+			expression_list_grammar expression_list_;
 		};
 
 		class term_grammar : public grammar{
@@ -206,6 +213,28 @@ namespace oosl{
 			ternary_expression_grammar_ptr_type ternary_expression_;
 		};
 
+		template <bool reinterpret>
+		class cast_expression_grammar : public grammar{
+		public:
+			cast_expression_grammar()
+				: grammar("OOSL_CAST_EXPRESSION_GRAMMAR"){
+				using namespace boost::spirit;
+
+				start_ = (qi::lit(reinterpret ? "reinterpret_cast" : "static_cast") >> '<' >> (type_ | ref_type_ | identifier_compatible_) >> qi::lit('>') >> '(' >> expression_ >> ')')
+					[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2)];
+			}
+
+			static node_ptr_type create(node_ptr_type type, node_ptr_type value){
+				return nullptr;
+			}
+
+		protected:
+			expression_grammar expression_;
+			type_grammar type_;
+			ref_type_grammar ref_type_;
+			identifier_compatible_grammar identifier_compatible_;
+		};
+
 		template <bool non_list>
 		class assignment_expression_grammar : public typed_grammar<expression_extension>{
 		public:
@@ -286,10 +315,20 @@ namespace oosl{
 		public:
 			list_expression_grammar();
 
+			static node_ptr_type create(boost::optional<node_ptr_type> value);
+
+		protected:
+			expression_list_grammar expression_list_;
+		};
+
+		class variadic_expression_grammar : public grammar{
+		public:
+			variadic_expression_grammar();
+
 			static node_ptr_type create(node_ptr_type value);
 
 		protected:
-
+			identifier_or_placeholder_grammar identifier_or_placeholder_;
 		};
 	}
 }

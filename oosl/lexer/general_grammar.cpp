@@ -1,6 +1,52 @@
 #include "general_grammar.h"
 #include "expression_grammar.h"
 
+oosl::lexer::expression_list_grammar::expression_list_grammar()
+	: grammar("OOSL_EXPRESSION_LIST"){
+	using namespace boost::spirit;
+
+	expression_ = std::make_shared<non_list_expression_grammar>();
+	variadic_expression_ = std::make_shared<variadic_expression_grammar>();
+
+	start_ = (((*expression_) | (*variadic_expression_)) % ",")[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::expression_list_grammar::create(const node_ptr_list_type &value){
+	typedef oosl::node::inplace<void> inplace_type;
+	typedef oosl::node::object::traverser_type traverser_type;
+
+	return std::make_shared<inplace_type>(node_id_type::list, [value](inplace_target_type target, void *out) -> bool{
+		switch (target){
+		case inplace_target_type::print:
+			break;
+		case inplace_target_type::traverse:
+		{
+			auto &traverser = *reinterpret_cast<traverser_type *>(out);
+			for (auto item : value){
+				if (!traverser(item))
+					break;
+			}
+			return true;
+		}
+		default:
+			return false;
+		}
+
+		auto first_print = true;
+		auto &writer = *reinterpret_cast<output_writer_type *>(out);
+
+		for (auto item : value){
+			if (first_print)
+				first_print = false;
+			else//Put delimiter
+				reinterpret_cast<output_writer_type *>(out)->write(", ");
+			item->echo(writer);
+		}
+
+		return true;
+	});
+}
+
 oosl::lexer::keyword_grammar::keyword_grammar()
 	: grammar("OOSL_KEYWORD"){
 	using namespace boost::spirit;
@@ -143,7 +189,9 @@ oosl::lexer::placeholder_grammar::placeholder_grammar()
 	: grammar("OOSL_PLACEHOLDER"){
 	using namespace boost::spirit;
 
-	start_ = ("__placeholder" > qi::lit("(") > (string_literal_ | identifier_) > ")")[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+	expression_ = std::make_shared<expression_grammar>();
+
+	start_ = ("__placeholder" > qi::lit("(") > (*expression_) > ")")[qi::_val = boost::phoenix::bind(&create, qi::_1)];
 }
 
 oosl::lexer::grammar::node_ptr_type oosl::lexer::placeholder_grammar::create(node_ptr_type value){
@@ -269,18 +317,22 @@ oosl::lexer::system_call_grammar::system_call_grammar()
 	: grammar("OOSL_SYSTEM_CALL"){
 	using namespace boost::spirit;
 
-	start_ = ("__call" > qi::lit("(") > qi::uint_ > ')')[qi::_val = boost::phoenix::bind(&create, qi::_1)];
+	start_ = ("__call" >> qi::lit("(") >> qi::uint_ >> -(',' >> expression_list_) >> ')')[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2)];
 }
 
-oosl::lexer::grammar::node_ptr_type oosl::lexer::system_call_grammar::create(unsigned int value){
+oosl::lexer::grammar::node_ptr_type oosl::lexer::system_call_grammar::create(unsigned int value, boost::optional<node_ptr_type> args){
 	typedef oosl::node::inplace<unsigned int> inplace_type;
-	return std::make_shared<inplace_type>(node_id_type::placeholder, [](inplace_type &owner, inplace_target_type target, void *out) -> bool{
+	return std::make_shared<inplace_type>(node_id_type::placeholder, [args](inplace_type &owner, inplace_target_type target, void *out) -> bool{
 		switch (target){
 		case inplace_target_type::eval:
 			return true;
 		case inplace_target_type::print:
 			reinterpret_cast<output_writer_type *>(out)->write("__call(");
 			reinterpret_cast<output_writer_type *>(out)->write(std::to_string(owner.value()));
+			if (args.is_initialized()){//Print arguments
+				reinterpret_cast<output_writer_type *>(out)->write(", ");
+				args.value()->echo(*reinterpret_cast<output_writer_type *>(out));
+			}
 			reinterpret_cast<output_writer_type *>(out)->write(")");
 			return true;
 		default:

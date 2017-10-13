@@ -18,6 +18,7 @@ namespace oosl{
 			storage,
 			type,
 			count,
+			traverse,
 		};
 
 		class numeric_inplace_value{
@@ -190,6 +191,10 @@ namespace oosl{
 			virtual size_type count() override{
 				size_type value;
 				return (callback_(*this, target_type::count, &value) ? value : base_type::count());
+			}
+
+			virtual void traverse(traverser_type traverser) override{
+				callback_(*this, target_type::traverse, &traverser);
 			}
 
 		protected:

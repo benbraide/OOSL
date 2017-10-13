@@ -56,6 +56,8 @@ oosl::node::object::size_type oosl::node::object::count(){
 	return 1u;
 }
 
+void oosl::node::object::traverse(traverser_type traverser){}
+
 oosl::node::object::entry_type *oosl::node::object::evaluate_(){
 	throw error_type::not_implemented;
 }
