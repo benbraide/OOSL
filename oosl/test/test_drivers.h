@@ -27,8 +27,8 @@ DOCTEST_TEST_CASE("drivers test"){
 	controller_impl_instance.runtime_info().temporary_storage = &temp;
 	controller_impl_instance.output_writer(controller_type::output_writer_key_type::nil, output_writer);
 
-	oosl::common::unary_operator_info unary_info{ true, operator_id::relational_not };
-	oosl::common::binary_operator_info binary_info{ operator_id::equality };
+	oosl::common::operator_info unary_info{ operator_id::relational_not };
+	oosl::common::operator_info binary_info{ operator_id::equality };
 
 	DOCTEST_SUBCASE("boolean driver test"){
 		auto false_value = controller_impl_instance.find_static_value(controller_type::static_value_type::false_);

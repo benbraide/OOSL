@@ -26,12 +26,12 @@ void oosl::driver::boolean::value(entry_type &entry, type_id_type to, char *dest
 	}
 }
 
-oosl::driver::object::entry_type *oosl::driver::boolean::evaluate_(entry_type &entry, unary_operator_info_type &operator_info){
-	if (operator_info.is_left && operator_info.id == operator_id_type::relational_not)
+oosl::driver::object::entry_type *oosl::driver::boolean::evaluate_(entry_type &entry, operator_info_type &operator_info){
+	if (operator_info.id == operator_id_type::relational_not)
 		return oosl::common::controller::active->temporary_storage().add_scalar((value<bool_type>(entry) == bool_type::false_) ? bool_type::true_ : bool_type::false_);
 	return object::evaluate_(entry, operator_info);
 }
 
-oosl::driver::object::entry_type *oosl::driver::boolean::evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::boolean::evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	return evaluate_equality_<bool_type>(entry, operator_info.id, operand);
 }

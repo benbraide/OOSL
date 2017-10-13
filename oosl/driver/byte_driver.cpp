@@ -41,35 +41,23 @@ void oosl::driver::byte::value(entry_type &entry, type_id_type to, char *destina
 	}
 }
 
-oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entry, unary_operator_info_type &operator_info){
+oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entry, operator_info_type &operator_info){
 	static auto base_options = (post_evaluation_type::byte | post_evaluation_type::assign);
-	if (operator_info.is_left){
-		switch (operator_info.id){
-		case operator_id_type::bitwise_inverse:
-			return post_evaluate_(entry, ~value<uint8_type>(entry), post_evaluation_type::byte);
-		case operator_id_type::decrement:
-			return post_evaluate_(entry, (value<uint8_type>(entry) - static_cast<uint8_type>(1)), base_options);
-		case operator_id_type::increment:
-			return post_evaluate_(entry, (value<uint8_type>(entry) + static_cast<uint8_type>(1)), base_options);
-		default:
-			break;
-		}
-	}
-	else{//Right
-		switch (operator_info.id){
-		case operator_id_type::decrement:
-			return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) - static_cast<uint8_type>(1)), (base_options | post_evaluation_type::value_return));
-		case operator_id_type::increment:
-			return post_evaluate_(entry, static_cast<uint8_type>(value<uint8_type>(entry) + static_cast<uint8_type>(1)), (base_options | post_evaluation_type::value_return));
-		default:
-			break;
-		}
+	switch (operator_info.id){
+	case operator_id_type::bitwise_inverse:
+		return post_evaluate_(entry, ~value<uint8_type>(entry), post_evaluation_type::byte);
+	case operator_id_type::decrement:
+		return post_evaluate_(entry, (value<uint8_type>(entry) - static_cast<uint8_type>(1)), base_options);
+	case operator_id_type::increment:
+		return post_evaluate_(entry, (value<uint8_type>(entry) + static_cast<uint8_type>(1)), base_options);
+	default:
+		break;
 	}
 
 	return object::evaluate_(entry, operator_info);
 }
 
-oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::byte::evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	return evaluate_(entry, operator_info.id, operand.type->driver()->value<uint8_type>(operand));
 }
 

@@ -47,7 +47,7 @@ void oosl::driver::char_driver::value(entry_type &entry, type_id_type to, char *
 	throw error_type::not_implemented;
 }
 
-oosl::driver::object::entry_type *oosl::driver::char_driver::evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::char_driver::evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	auto operand_type = operand.type->driver()->type(operand);
 	if (operand_type->id() != type_id_type::char_ && operand_type->id() != type_id_type::wchar_){//Non-numeric operand
 		if (operator_info.id != operator_id_type::plus)//Not supported

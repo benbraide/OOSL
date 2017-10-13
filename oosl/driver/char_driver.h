@@ -21,7 +21,7 @@ namespace oosl{
 			virtual void value(entry_type &entry, type_id_type to, char *destination) override;
 
 		protected:
-			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
+			virtual entry_type *evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand) override;
 
 			template <typename target_type>
 			void echo_(entry_type &entry, output_writer_type &writer, type_id_type id){

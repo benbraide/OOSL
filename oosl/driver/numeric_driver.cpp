@@ -111,34 +111,34 @@ void oosl::driver::numeric::value(entry_type &entry, type_id_type to, char *dest
 	throw error_type::not_implemented;
 }
 
-oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &entry, unary_operator_info_type &operator_info){
+oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &entry, operator_info_type &operator_info){
 	switch (entry.type->id()){
 	case type_id_type::int8_:
-		return evaluate_integral_<__int8>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<__int8>(entry, operator_info.id);
 	case type_id_type::uint8_:
-		return evaluate_integral_<unsigned __int8>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<unsigned __int8>(entry, operator_info.id);
 	case type_id_type::int16_:
-		return evaluate_integral_<__int16>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<__int16>(entry, operator_info.id);
 	case type_id_type::uint16_:
-		return evaluate_integral_<unsigned __int16>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<unsigned __int16>(entry, operator_info.id);
 	case type_id_type::int32_:
-		return evaluate_integral_<__int32>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<__int32>(entry, operator_info.id);
 	case type_id_type::uint32_:
-		return evaluate_integral_<unsigned __int32>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<unsigned __int32>(entry, operator_info.id);
 	case type_id_type::int64_:
-		return evaluate_integral_<__int64>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<__int64>(entry, operator_info.id);
 	case type_id_type::uint64_:
-		return evaluate_integral_<unsigned __int64>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_integral_<unsigned __int64>(entry, operator_info.id);
 	/*case type_id_type::int128_:
-		return (is_integral ? evaluate_integral_<__int128>(entry, operator_info.id, operator_info.is_left) : evaluate_<__int128>(entry, operator_info.id, operator_info.is_left));
+		return (is_integral ? evaluate_integral_<__int128>(entry, operator_info.id) : evaluate_<__int128>(entry, operator_info.id));
 	case type_id_type::uint128_:
-		return (is_integral ? evaluate_integral_<unsigned __int128>(entry, operator_info.id, operator_info.is_left) : evaluate_<unsigned __int128>(entry, operator_info.id, operator_info.is_left));*/
+		return (is_integral ? evaluate_integral_<unsigned __int128>(entry, operator_info.id) : evaluate_<unsigned __int128>(entry, operator_info.id));*/
 	case type_id_type::float_:
-		return evaluate_signed_<float>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_signed_<float>(entry, operator_info.id);
 	case type_id_type::double_:
-		return evaluate_signed_<double>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_signed_<double>(entry, operator_info.id);
 	case type_id_type::ldouble:
-		return evaluate_signed_<long double>(entry, operator_info.id, operator_info.is_left);
+		return evaluate_signed_<long double>(entry, operator_info.id);
 	default:
 		break;
 	}
@@ -146,7 +146,7 @@ oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &e
 	return object::evaluate_(entry, operator_info);
 }
 
-oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::numeric::evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	auto operand_type = operand.type->driver()->type(operand);
 	if (!operand_type->is_numeric()){//Non-numeric operand
 		if (operator_info.id != operator_id_type::plus)//Not supported

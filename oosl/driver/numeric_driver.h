@@ -27,9 +27,9 @@ namespace oosl{
 			virtual void value(entry_type &entry, type_id_type to, char *destination) override;
 
 		protected:
-			virtual entry_type *evaluate_(entry_type &entry, unary_operator_info_type &operator_info) override;
+			virtual entry_type *evaluate_(entry_type &entry, operator_info_type &operator_info) override;
 
-			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
+			virtual entry_type *evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand) override;
 
 			template <typename from_type>
 			void value_from_(entry_type &entry, type_id_type to, char *destination){
@@ -172,69 +172,53 @@ namespace oosl{
 			}
 
 			template <typename target_type>
-			entry_type *evaluate_(entry_type &entry, operator_id_type operator_id, bool left){
-				if (left){
-					switch (operator_id){
-					case operator_id_type::plus:
-						return post_evaluate_(entry, value<target_type>(entry));
-					default:
-						break;
-					}
+			entry_type *evaluate_(entry_type &entry, operator_id_type operator_id){
+				switch (operator_id){
+				case operator_id_type::plus:
+					return post_evaluate_(entry, value<target_type>(entry));
+				default:
+					break;
 				}
 
 				throw error_type::not_implemented;
 			}
 
 			template <typename target_type>
-			entry_type *evaluate_signed_(entry_type &entry, operator_id_type operator_id, bool left){
-				if (left){
-					switch (operator_id){
-					case operator_id_type::minus:
-						return post_evaluate_(entry, -value<target_type>(entry));
-					default:
-						break;
-					}
+			entry_type *evaluate_signed_(entry_type &entry, operator_id_type operator_id){
+				switch (operator_id){
+				case operator_id_type::minus:
+					return post_evaluate_(entry, -value<target_type>(entry));
+				default:
+					break;
 				}
 
-				return evaluate_<target_type>(entry, operator_id, left);
+				return evaluate_<target_type>(entry, operator_id);
 			}
 
 			template <typename target_type>
-			entry_type *evaluate_integral_(entry_type &entry, operator_id_type operator_id, bool left){
-				if (left){
-					switch (operator_id){
-					case operator_id_type::bitwise_inverse:
-						return post_evaluate_(entry, ~value<target_type>(entry));
-					case operator_id_type::decrement:
-						return post_evaluate_(entry, (value<target_type>(entry) - static_cast<target_type>(1)), post_evaluation_type::assign);
-					case operator_id_type::increment:
-						return post_evaluate_(entry, (value<target_type>(entry) + static_cast<target_type>(1)), post_evaluation_type::assign);
-					default:
-						break;
-					}
-				}
-				else{//Right
-					switch (operator_id){
-					case operator_id_type::decrement:
-						return post_evaluate_(entry, (value<target_type>(entry) - static_cast<target_type>(1)), (post_evaluation_type::assign | post_evaluation_type::value_return));
-					case operator_id_type::increment:
-						return post_evaluate_(entry, (value<target_type>(entry) + static_cast<target_type>(1)), (post_evaluation_type::assign | post_evaluation_type::value_return));
-					default:
-						break;
-					}
+			entry_type *evaluate_integral_(entry_type &entry, operator_id_type operator_id){
+				switch (operator_id){
+				case operator_id_type::bitwise_inverse:
+					return post_evaluate_(entry, ~value<target_type>(entry));
+				case operator_id_type::decrement:
+					return post_evaluate_(entry, (value<target_type>(entry) - static_cast<target_type>(1)), post_evaluation_type::assign);
+				case operator_id_type::increment:
+					return post_evaluate_(entry, (value<target_type>(entry) + static_cast<target_type>(1)), post_evaluation_type::assign);
+				default:
+					break;
 				}
 
-				return call_evaluate_<target_type>(entry, operator_id, left);
+				return call_evaluate_<target_type>(entry, operator_id);
 			}
 
 			template <typename target_type>
-			std::enable_if_t<std::is_unsigned_v<target_type>, entry_type *> call_evaluate_(entry_type &entry, operator_id_type operator_id, bool left){
-				return evaluate_<target_type>(entry, operator_id, left);
+			std::enable_if_t<std::is_unsigned_v<target_type>, entry_type *> call_evaluate_(entry_type &entry, operator_id_type operator_id){
+				return evaluate_<target_type>(entry, operator_id);
 			}
 
 			template <typename target_type>
-			std::enable_if_t<!std::is_unsigned_v<target_type>, entry_type *> call_evaluate_(entry_type &entry, operator_id_type operator_id, bool left){
-				return evaluate_signed_<target_type>(entry, operator_id, left);
+			std::enable_if_t<!std::is_unsigned_v<target_type>, entry_type *> call_evaluate_(entry_type &entry, operator_id_type operator_id){
+				return evaluate_signed_<target_type>(entry, operator_id);
 			}
 
 			std::string suffix_(entry_type &entry);

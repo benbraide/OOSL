@@ -27,28 +27,26 @@ oosl::driver::object::entry_type *oosl::driver::dynamic_driver::linked(entry_typ
 	return &dynamic_cast<dependency_type *>(dependency.get())->value();
 }
 
-oosl::driver::object::entry_type *oosl::driver::dynamic_driver::evaluate(entry_type &entry, unary_operator_info_type &operator_info){
+oosl::driver::object::entry_type *oosl::driver::dynamic_driver::evaluate(entry_type &entry, operator_info_type &operator_info){
 	auto active_controller = common::controller::active;
 	auto &temp_storage = active_controller->temporary_storage();
 
-	if (operator_info.is_left){
-		switch (operator_info.id){
-		case operator_id_type::bitwise_and://Return pointer to address
-			if (!OOSL_IS(entry.attributes, attribute_type::lval))
-				throw error_type::rval_ref;
-			return temp_storage.add_scalar(entry.address, std::make_shared<oosl::type::pointer>(entry.type->non_modified()->reflect()));
-		case operator_id_type::call://(this)
-			return &entry;
-		default:
-			break;
-		}
+	switch (operator_info.id){
+	case operator_id_type::bitwise_and://Return pointer to address
+		if (!OOSL_IS(entry.attributes, attribute_type::lval))
+			throw error_type::rval_ref;
+		return temp_storage.add_scalar(entry.address, std::make_shared<oosl::type::pointer>(entry.type->non_modified()->reflect()));
+	case operator_id_type::call://(this)
+		return &entry;
+	default:
+		break;
 	}
 
 	auto linked_target = linked(entry);
 	return linked_target->type->driver()->evaluate(*linked_target, operator_info);
 }
 
-oosl::driver::object::entry_type *oosl::driver::dynamic_driver::evaluate(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::dynamic_driver::evaluate(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	if (operator_info.id == operator_id_type::assignment)
 		return assign(entry, operand);//Assign
 

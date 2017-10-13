@@ -21,9 +21,9 @@ namespace oosl{
 
 			virtual entry_type *linked(entry_type &entry) override;
 
-			virtual entry_type *evaluate(entry_type &entry, unary_operator_info_type &operator_info) override;
+			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info) override;
 
-			virtual entry_type *evaluate(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
+			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info, entry_type &operand) override;
 
 			virtual entry_type *assign(entry_type &entry, entry_type &value) override;
 

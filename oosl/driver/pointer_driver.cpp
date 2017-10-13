@@ -80,34 +80,22 @@ long long oosl::driver::pointer::pre_multiply(entry_type &entry, long long value
 	return (value * static_cast<long long>(entry.type->underlying_type()->size()));
 }
 
-oosl::driver::object::entry_type *oosl::driver::pointer::evaluate_(entry_type &entry, unary_operator_info_type &operator_info){
-	if (operator_info.is_left){
-		switch (operator_info.id){
-		case operator_id_type::times://Dereference
-			return target_entry(entry);
-		case operator_id_type::decrement:
-			return post_evaluate_(entry, (value<uint64_type>(entry) - pre_multiply(entry, 1)), post_evaluation_type::assign);
-		case operator_id_type::increment:
-			return post_evaluate_(entry, (value<uint64_type>(entry) + pre_multiply(entry, 1)), post_evaluation_type::assign);
-		default:
-			break;
-		}
-	}
-	else{//Right
-		switch (operator_info.id){
-		case operator_id_type::decrement:
-			return post_evaluate_(entry, (value<uint64_type>(entry) - pre_multiply(entry, 1)), (post_evaluation_type::assign | post_evaluation_type::value_return));
-		case operator_id_type::increment:
-			return post_evaluate_(entry, (value<uint64_type>(entry) + pre_multiply(entry, 1)), (post_evaluation_type::assign | post_evaluation_type::value_return));
-		default:
-			break;
-		}
+oosl::driver::object::entry_type *oosl::driver::pointer::evaluate_(entry_type &entry, operator_info_type &operator_info){
+	switch (operator_info.id){
+	case operator_id_type::times://Dereference
+		return target_entry(entry);
+	case operator_id_type::decrement:
+		return post_evaluate_(entry, (value<uint64_type>(entry) - pre_multiply(entry, 1)), post_evaluation_type::assign);
+	case operator_id_type::increment:
+		return post_evaluate_(entry, (value<uint64_type>(entry) + pre_multiply(entry, 1)), post_evaluation_type::assign);
+	default:
+		break;
 	}
 
 	return object::evaluate_(entry, operator_info);
 }
 
-oosl::driver::object::entry_type *oosl::driver::pointer::evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::pointer::evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	auto operand_type = operand.type->driver()->type(operand);
 	if (operand_type->is_integral()){//Integral evaluation
 		switch (operator_info.id){

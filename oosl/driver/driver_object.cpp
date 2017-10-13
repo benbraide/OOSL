@@ -95,40 +95,35 @@ oosl::driver::object::attribute_type oosl::driver::object::attributes(entry_type
 	return attributes;
 }
 
-oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &entry, unary_operator_info_type &operator_info){
+oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &entry, operator_info_type &operator_info){
 	if (entry.type->is_void())
 		throw error_type::void_object;
 
 	auto active_controller = common::controller::active;
 	auto &temp_storage = active_controller->temporary_storage();
 
-	if (operator_info.is_left){
-		switch (operator_info.id){
-		case operator_id_type::bitwise_and://Return pointer to address
-			if (!OOSL_IS(entry.attributes, attribute_type::lval))
-				throw error_type::rval_ref;
-			return temp_storage.add_scalar(entry.address, std::make_shared<oosl::type::pointer>(entry.type->non_modified()->reflect()));
-		case operator_id_type::sizeof_:
-			return temp_storage.add_scalar(size(entry));
-		case operator_id_type::typeof:
-			return temp_storage.add_scalar(*entry.type);
-		case operator_id_type::call://(this)
-			return &entry;
-		default:
-			if (OOSL_IS(entry.attributes, attribute_type::uninitialized))
-				throw error_type::uninitialized_object;
-			return evaluate_(entry, operator_info);
-		}
+	switch (operator_info.id){
+	case operator_id_type::bitwise_and://Return pointer to address
+		if (!OOSL_IS(entry.attributes, attribute_type::lval))
+			throw error_type::rval_ref;
+		return temp_storage.add_scalar(entry.address, std::make_shared<oosl::type::pointer>(entry.type->non_modified()->reflect()));
+	case operator_id_type::sizeof_:
+		return temp_storage.add_scalar(size(entry));
+	case operator_id_type::typeof:
+		return temp_storage.add_scalar(*type(entry));
+	case operator_id_type::call://(this)
+		return &entry;
+	default:
+		break;
 	}
 
-	auto entry_type = type(entry);
-	auto temp = temp_storage.add_scalar(reinterpret_cast<uint64_type>(entry_type), active_controller->find_type(oosl::type::id::type_));
+	if (OOSL_IS(entry.attributes, attribute_type::uninitialized))
+		throw error_type::uninitialized_object;
 
-	active_controller->memory().add_dependency(temp->address, std::make_shared<type_value_dependency_type>(entry_type->reflect()));
-	return temp;
+	return evaluate_(entry, operator_info);
 }
 
-oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	if (operator_info.id == operator_id_type::assignment)
 		return assign(entry, operand);//Assign
 
@@ -197,11 +192,11 @@ void oosl::driver::object::value(entry_type &entry, type_id_type to, char *desti
 	throw error_type::not_implemented;
 }
 
-oosl::driver::object::entry_type *oosl::driver::object::evaluate_(entry_type &entry, unary_operator_info_type &operator_info){
+oosl::driver::object::entry_type *oosl::driver::object::evaluate_(entry_type &entry, operator_info_type &operator_info){
 	throw error_type::unhandled_operator;
 }
 
-oosl::driver::object::entry_type *oosl::driver::object::evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand){
+oosl::driver::object::entry_type *oosl::driver::object::evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand){
 	throw error_type::unhandled_operator;
 }
 

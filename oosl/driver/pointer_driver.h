@@ -25,9 +25,9 @@ namespace oosl{
 			virtual long long pre_multiply(entry_type &entry, long long value);
 
 		protected:
-			virtual entry_type *evaluate_(entry_type &entry, unary_operator_info_type &operator_info) override;
+			virtual entry_type *evaluate_(entry_type &entry, operator_info_type &operator_info) override;
 
-			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand) override;
+			virtual entry_type *evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand) override;
 
 			virtual entry_type *offset_entry_(entry_type &entry, long long offset, bool assign = false);
 		};

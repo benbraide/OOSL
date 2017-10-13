@@ -33,8 +33,7 @@ namespace oosl{
 			typedef controller_type::output_writer_key_type output_writer_key_type;
 
 			typedef common::operator_id operator_id_type;
-			typedef common::unary_operator_info unary_operator_info_type;
-			typedef common::binary_operator_info binary_operator_info_type;
+			typedef common::operator_info operator_info_type;
 
 			typedef storage::entry entry_type;
 			typedef entry_type::attribute_type attribute_type;
@@ -75,9 +74,9 @@ namespace oosl{
 
 			virtual attribute_type attributes(entry_type &entry);
 
-			virtual entry_type *evaluate(entry_type &entry, unary_operator_info_type &operator_info);
+			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info);
 
-			virtual entry_type *evaluate(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand);
+			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info, entry_type &operand);
 
 			virtual entry_type *assign(entry_type &entry, entry_type &value);
 
@@ -114,9 +113,9 @@ namespace oosl{
 			}
 
 		protected:
-			virtual entry_type *evaluate_(entry_type &entry, unary_operator_info_type &operator_info);
+			virtual entry_type *evaluate_(entry_type &entry, operator_info_type &operator_info);
 
-			virtual entry_type *evaluate_(entry_type &entry, binary_operator_info_type &operator_info, entry_type &operand);
+			virtual entry_type *evaluate_(entry_type &entry, operator_info_type &operator_info, entry_type &operand);
 
 			virtual entry_type *assign_(entry_type &entry, entry_type &value);
 
