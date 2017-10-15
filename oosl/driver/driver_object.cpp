@@ -139,6 +139,10 @@ oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &ent
 	return evaluate_(entry, operator_info, operand);
 }
 
+oosl::driver::object::entry_type *oosl::driver::object::evaluate(entry_type &entry, operator_info_type &operator_info, node_ptr_type &operand){
+	throw error_type::unhandled_operator;
+}
+
 oosl::driver::object::entry_type *oosl::driver::object::assign(entry_type &entry, entry_type &value){
 	if (entry.type->is_void() || value.type->is_void())
 		throw error_type::void_object;

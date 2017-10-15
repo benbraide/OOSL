@@ -4,8 +4,9 @@
 #define OOSL_EXPRESSION_NODE_H
 
 #include "../common/operator_info.h"
+#include "../driver/driver_object.h"
 
-#include "node_object.h"
+#include "inplace_node.h"
 
 namespace oosl{
 	namespace node{
@@ -48,8 +49,12 @@ namespace oosl{
 
 			virtual void echo(output_writer_type &writer) override;
 
+			static bool is_undefined(ptr_type target);
+
 		protected:
 			virtual entry_type *evaluate_() override;
+
+			virtual entry_type *compare_undefined_(ptr_type other);
 
 			operator_info_type info_;
 			ptr_type left_;

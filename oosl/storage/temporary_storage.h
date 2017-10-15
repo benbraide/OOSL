@@ -52,6 +52,8 @@ namespace oosl{
 
 			entry_type *add_scalar(std::nullptr_t);
 
+			entry_type *add_scalar(bool value);
+
 			entry_type *add_scalar(bool_type value);
 
 			entry_type *add_scalar(other_type value);

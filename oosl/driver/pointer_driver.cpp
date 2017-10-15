@@ -36,6 +36,16 @@ oosl::driver::object::entry_type *oosl::driver::pointer::cast(entry_type &entry,
 	return object::cast(entry, type, options);
 }
 
+oosl::driver::object::entry_type *oosl::driver::pointer::evaluate(entry_type &entry, operator_info_type &operator_info, node_ptr_type &operand){
+	if (operator_info.id == operator_id_type::member_pointer_access){
+		auto target = target_entry(entry);
+		operator_info_type member_access{ operator_id_type::member_access };
+		return target->type->driver()->evaluate(*target, member_access, operand);
+	}
+
+	return object::evaluate(entry, operator_info, operand);
+}
+
 void oosl::driver::pointer::echo(entry_type &entry, output_writer_type &writer){
 	if (OOSL_IS(entry.attributes, attribute_type::uninitialized)){//Uninitialized
 		writer.write("<undefined>");

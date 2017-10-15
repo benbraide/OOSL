@@ -16,6 +16,8 @@ namespace oosl{
 
 			virtual entry_type *cast(entry_type &entry, type_object_type &type, cast_option_type options = cast_option_type::nil) override;
 
+			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info, node_ptr_type &operand) override;
+
 			virtual void echo(entry_type &entry, output_writer_type &writer) override;
 
 			virtual void value(entry_type &entry, type_id_type to, char *destination) override;

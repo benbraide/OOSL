@@ -1,4 +1,5 @@
 #include "expression_node.h"
+#include "../lexer/constant_grammar.h"
 
 std::string oosl::node::expression_helper::known_operator_name(operator_id_type id){
 	switch (id){
@@ -119,7 +120,8 @@ void oosl::node::unary_expression::echo(output_writer_type &writer){
 }
 
 oosl::node::object::entry_type *oosl::node::unary_expression::evaluate_(){
-	return nullptr;
+	auto operand = operand_->evaluate();
+	return operand->type->driver()->evaluate(*operand, info_);
 }
 
 oosl::node::binary_expression::binary_expression(const operator_info_type &info, ptr_type left, ptr_type right)
@@ -142,6 +144,92 @@ void oosl::node::binary_expression::echo(output_writer_type &writer){
 	right_->echo(writer);
 }
 
+bool oosl::node::binary_expression::is_undefined(ptr_type target){
+	typedef oosl::lexer::constant_grammar::constant_type constant_type;
+	typedef oosl::node::inplace<constant_type> inplace_type;
+
+	auto inplace_node = dynamic_cast<inplace_type *>(target.get());
+	return (inplace_node != nullptr && inplace_node->value() == constant_type::undefined);
+}
+
 oosl::node::object::entry_type *oosl::node::binary_expression::evaluate_(){
-	return nullptr;
+	if (is_undefined(left_))
+		return compare_undefined_(right_);
+
+	if (is_undefined(right_))
+		return compare_undefined_(left_);
+
+	auto left_operand = left_->evaluate();
+	auto left_operand_driver = left_operand->type->driver();
+
+	try{
+		return left_operand_driver->evaluate(*left_operand, info_, right_);
+	}
+	catch (error_type err){
+		if (err != error_type::unhandled_operator)
+			throw;//Forward exception
+
+		switch (info_.id){
+		case operator_id_type::member_access:
+		case operator_id_type::member_pointer_access:
+			throw error_type::member_access;
+			break;
+		default:
+			break;
+		}
+	}
+
+	auto right_operand = right_->evaluate();
+	switch (info_.id){
+	case operator_id_type::explicit_equality:
+		if (!left_operand->type->driver()->type(*left_operand)->is_same(*right_operand->type->driver()->type(*right_operand)))
+			return common::controller::active->temporary_storage().add_scalar(false);
+		break;
+	case operator_id_type::explicit_inverse_equality:
+		if (!left_operand->type->driver()->type(*left_operand)->is_same(*right_operand->type->driver()->type(*right_operand)))
+			return common::controller::active->temporary_storage().add_scalar(true);
+		break;
+	default:
+		break;
+	}
+
+	return left_operand->type->driver()->evaluate(*left_operand, info_, *right_operand);
+}
+
+oosl::node::object::entry_type *oosl::node::binary_expression::compare_undefined_(ptr_type other){
+	bool equality;
+	switch (info_.id){
+	case operator_id_type::explicit_equality:
+	case operator_id_type::equality:
+		equality = true;
+		break;
+	case operator_id_type::explicit_inverse_equality:
+	case operator_id_type::inverse_equality:
+		equality = false;
+		break;
+	default:
+		throw common::error_codes::unhandled_operator;
+		break;
+	}
+
+	if (other == right_ && is_undefined(other))
+		return common::controller::active->temporary_storage().add_scalar(equality);
+
+	try{
+		other->evaluate();
+	}
+	catch (common::error_codes err){
+		switch (err){
+		case common::error_codes::not_found:
+		case common::error_codes::storage_not_found:
+		case common::error_codes::out_of_bounds:
+			return common::controller::active->temporary_storage().add_scalar(equality);
+		default:
+			break;
+		}
+
+		throw;//Forward exception
+	}
+
+	return common::controller::active->temporary_storage().add_scalar(!equality);
 }

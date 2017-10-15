@@ -22,6 +22,7 @@ namespace oosl{
 			rval_assignment,
 			integer_required,
 			unhandled_operator,
+			member_access,
 			not_implemented,
 			driver_not_found,
 			writer_not_found,
@@ -34,6 +35,7 @@ namespace oosl{
 			not_found,
 			storage_not_found,
 			type_not_found,
+			out_of_bounds,
 		};
 	}
 }

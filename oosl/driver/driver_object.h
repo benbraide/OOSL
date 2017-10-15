@@ -10,6 +10,7 @@
 #include "../common/operator_info.h"
 #include "../common/output_writer.h"
 
+#include "../node/node_object.h"
 #include "../storage/temporary_storage.h"
 
 namespace oosl{
@@ -21,6 +22,8 @@ namespace oosl{
 			typedef oosl::type::bool_type bool_type;
 
 			typedef type_object_type::ptr_type type_ptr_type;
+			typedef oosl::node::object::ptr_type node_ptr_type;
+
 			typedef oosl::memory::value_dependency<type_ptr_type> type_value_dependency_type;
 			typedef oosl::memory::block::attribute_type memory_attribute_type;
 
@@ -77,6 +80,8 @@ namespace oosl{
 			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info);
 
 			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info, entry_type &operand);
+
+			virtual entry_type *evaluate(entry_type &entry, operator_info_type &operator_info, node_ptr_type &operand);
 
 			virtual entry_type *assign(entry_type &entry, entry_type &value);
 

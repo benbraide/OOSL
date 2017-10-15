@@ -17,6 +17,10 @@ oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(std::
 	return common::controller::active->find_static_value(common::controller::static_value_type::nullptr_);
 }
 
+oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(bool value){
+	return add_scalar(value ? bool_type::true_ : bool_type::false_);
+}
+
 oosl::storage::temporary::entry_type *oosl::storage::temporary::add_scalar(bool_type value){
 	if (common::controller::active->initializing())//Controller is initializing
 		return add_scalar_(value, common::controller::active->find_type(type_id_type::bool_));
