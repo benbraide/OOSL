@@ -25,8 +25,9 @@ namespace oosl{
 			typedef std::pair<const std::string *, value_type *> order_info_type;
 			typedef std::list<order_info_type> order_list_type;
 
-			typedef oosl::memory::manager::lock_type lock_type;
-			typedef oosl::common::lock_once<lock_type> lock_once_type;
+			typedef std::shared_mutex lock_type;
+			typedef std::lock_guard<lock_type> guard_type;
+			typedef std::shared_lock<lock_type> shared_guard_type;
 
 			enum class find_type{
 				nil,
@@ -63,18 +64,23 @@ namespace oosl{
 			virtual void use(object &storage);
 
 		protected:
-			void use_(const std::string &key, value_ptr_type value);
+			virtual void use_(const std::string &key, value_ptr_type value);
 
-			void remove_(value_list_iterator_type iter);
+			virtual void remove_(value_list_iterator_type iter);
 
-			value_list_iterator_type find_(const std::string &key);
+			virtual value_type *do_find_(const std::string &key, find_type type);
 
-			value_list_iterator_type find_(value_type *value);
+			virtual value_list_iterator_type find_locked_(const std::string &key);
+
+			virtual value_list_iterator_type find_(const std::string &key);
+
+			virtual value_list_iterator_type find_(value_type *value);
 
 			object *parent_;
 			value_list_type value_list_;
 			order_list_type order_list_;
 			bool inside_destructor_;
+			lock_type lock_;
 		};
 	}
 }

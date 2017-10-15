@@ -26,11 +26,13 @@ namespace oosl{
 			typedef std::shared_ptr<type_object_type> type_ptr_type;
 			typedef std::shared_ptr<object_type> object_ptr_type;
 
-			typedef std::variant<entry_type, type_ptr_type, object_ptr_type, uint64_type> variant_type;
+			typedef std::variant<entry_type, type_ptr_type, object_type *, object_ptr_type, uint64_type> variant_type;
 
 			template <typename arg_type>
 			explicit value(const arg_type &arg)
 				: value_(arg){}
+
+			explicit value(object_type *arg);
 
 			entry_type *object();
 

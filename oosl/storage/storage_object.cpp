@@ -2,13 +2,14 @@
 
 #include "../type/type_object.h"
 #include "../driver/driver_object.h"
+#include "../common/structures.h"
 
 oosl::storage::object::object(object *parent)
 	: parent_(parent), inside_destructor_(false){}
 
 oosl::storage::object::~object(){
 	if (!common::controller::active->exiting()){
-		lock_once_type guard(common::controller::active->memory().lock());
+		guard_type guard(lock_);
 
 		inside_destructor_ = true;
 		if (!order_list_.empty()){
@@ -31,29 +32,26 @@ oosl::storage::object *oosl::storage::object::match(const std::string &name){
 }
 
 oosl::storage::object::value_type *oosl::storage::object::find(const std::string &key, find_type type){
-	auto iter = find_(key);
-	if (iter != value_list_.end())//Found
-		return iter->second.get();
-	return ((type == find_type::recursive && parent_ != nullptr) ? parent_->find(key, type) : nullptr);
+	return ((common::controller::active->runtime_info().find_target == nullptr) ? do_find_(key, type) : nullptr);
 }
 
 void oosl::storage::object::remove(const std::string &key){
-	lock_once_type guard(common::controller::active->memory().lock());
+	guard_type guard(lock_);
 	remove_(find_(key));
 }
 
 void oosl::storage::object::remove(value_type *value){
-	lock_once_type guard(common::controller::active->memory().lock());
+	guard_type guard(lock_);
 	remove_(find_(value));
 }
 
 void oosl::storage::object::use(const std::string &key, value_ptr_type value){
-	lock_once_type guard(common::controller::active->memory().lock());
+	guard_type guard(lock_);
 	use_(key, value);
 }
 
 void oosl::storage::object::use(object &storage){
-	lock_once_type guard(common::controller::active->memory().lock());
+	guard_type guard(lock_);
 	for (auto &entry : storage.value_list_)
 		use_(entry.first, entry.second);
 }
@@ -83,15 +81,25 @@ void oosl::storage::object::remove_(value_list_iterator_type iter){
 		value_list_.erase(iter);//Erase from list
 }
 
+oosl::storage::object::value_type *oosl::storage::object::do_find_(const std::string &key, find_type type){
+	auto iter = find_locked_(key);
+	if (iter != value_list_.end())//Found
+		return iter->second.get();
+	return ((type == find_type::recursive && parent_ != nullptr) ? parent_->find(key, type) : nullptr);
+}
+
+oosl::storage::object::value_list_iterator_type oosl::storage::object::find_locked_(const std::string &key){
+	shared_guard_type guard(lock_);
+	return find_(key);
+}
+
 oosl::storage::object::value_list_iterator_type oosl::storage::object::find_(const std::string &key){
-	lock_once_type guard(common::controller::active->memory().lock(), memory::manager::shared_locker);
 	return value_list_.find(key);
 }
 
 oosl::storage::object::value_list_iterator_type oosl::storage::object::find_(value_type *value){
-	lock_once_type guard(common::controller::active->memory().lock(), memory::manager::shared_locker);
 	for (auto iter = value_list_.begin(); iter != value_list_.end(); ++iter){
-		if (&*iter->second == value)
+		if (iter->second.get() == value)
 			return iter;
 	}
 

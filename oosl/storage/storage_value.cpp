@@ -1,6 +1,9 @@
 #include "storage_object.h"
 #include "../type/type_object.h"
 
+oosl::storage::value::value(object_type *arg)
+	: value_(arg){}
+
 oosl::storage::value::entry_type *oosl::storage::value::object(){
 	return (is_object() ? &std::get<entry_type>(value_) : nullptr);
 }
@@ -10,7 +13,9 @@ oosl::storage::value::type_object_type *oosl::storage::value::type(){
 }
 
 oosl::storage::value::object_type *oosl::storage::value::storage(){
-	return (is_storage() ? std::get<object_ptr_type>(value_).get() : nullptr);
+	if (std::holds_alternative<object_type *>(value_))
+		return std::get<object_type *>(value_);
+	return (std::holds_alternative<object_ptr_type>(value_) ? std::get<object_ptr_type>(value_).get() : nullptr);
 }
 
 oosl::storage::value::uint64_type oosl::storage::value::unknown(){
@@ -26,7 +31,7 @@ bool oosl::storage::value::is_type() const{
 }
 
 bool oosl::storage::value::is_storage() const{
-	return std::holds_alternative<object_ptr_type>(value_);
+	return (std::holds_alternative<object_type *>(value_) || std::holds_alternative<object_ptr_type>(value_));
 }
 
 bool oosl::storage::value::is_unknown() const{
