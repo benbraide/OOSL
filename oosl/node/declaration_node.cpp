@@ -38,6 +38,18 @@ oosl::node::object::ptr_type oosl::node::declaration::type_node(){
 	return type_;
 }
 
+oosl::node::declaration::storage_attribute_type oosl::node::declaration::attributes(){
+	return attributes_;
+}
+
+oosl::node::object::ptr_type oosl::node::declaration::id_node(){
+	return id_;
+}
+
+oosl::node::object::ptr_type oosl::node::declaration::init(){
+	return init_;
+}
+
 oosl::node::object::entry_type *oosl::node::declaration::evaluate_(){
 	auto &runtime_info = common::controller::active->runtime_info();
 	if (static_value_.address != 0u)
@@ -55,17 +67,34 @@ oosl::node::object::entry_type *oosl::node::declaration::evaluate_(){
 			throw error_type::missing_initialization;
 
 		auto init_type = init_value->type->driver()->type(*init_value)->reflect();
-		if (type_value->is_ref())
+		if (type_value->is_rval_ref()){//Reference depends on initialization
+			if (OOSL_IS(init_value->attributes, entry_type::attribute_type::lval))
+				type_value = std::make_shared<oosl::type::modified>(init_type, storage_attribute_type::ref);
+			else//Non-reference
+				type_value = init_type;
+		}
+		else if (type_value->is_ref())
 			type_value = std::make_shared<oosl::type::modified>(init_type, storage_attribute_type::ref);
 		else//Not a reference
 			type_value = init_type;
 	}
+	else if (type_value->is_rval_ref()){//Reference depends on initialization
+		if (type_value->is_ref() && init_value == nullptr)//Initialization required
+			throw error_type::missing_initialization;
+
+		if (OOSL_IS(init_value->attributes, entry_type::attribute_type::lval))
+			type_value = std::make_shared<oosl::type::modified>(type_value->underlying_type()->reflect(), storage_attribute_type::ref);
+		else//Non-reference
+			type_value = type_value->underlying_type()->reflect();
+	}
+	else if (type_value->is_ref() && init_value == nullptr)//Initialization required
+		throw error_type::missing_initialization;
 
 	auto memory_block = common::controller::active->memory().allocate(type_value->size(), runtime_info.address_offset);
 	if (runtime_info.address_offset != 0u)//Add offset
 		runtime_info.address_offset += memory_block->actual_size;
 
-	auto attributes = entry_type::attribute_type::nil;
+	auto attributes = entry_type::attribute_type::lval;
 	if (OOSL_IS(attributes_, storage_attribute_type::static_)){//Static declaration
 		OOSL_SET(attributes, entry_type::attribute_type::static_ | entry_type::attribute_type::no_free);
 		if (OOSL_IS(attributes_, storage_attribute_type::tls))
@@ -83,4 +112,16 @@ oosl::node::object::entry_type *oosl::node::declaration::evaluate_(){
 		static_value_ = entry;//Store static value
 
 	return value->object();
+}
+
+oosl::node::multiple_declaration::~multiple_declaration() = default;
+
+void oosl::node::multiple_declaration::echo(output_writer_type &writer){
+	writer.write(", ");
+	id_->echo(writer);
+
+	if (init_ != nullptr){//Print initialization
+		writer.write(" = ");
+		init_->echo(writer);
+	}
 }

@@ -26,6 +26,12 @@ namespace oosl{
 
 			virtual ptr_type type_node() override;
 
+			virtual storage_attribute_type attributes();
+
+			virtual ptr_type id_node();
+
+			virtual ptr_type init();
+
 		protected:
 			virtual entry_type *evaluate_() override;
 
@@ -34,6 +40,19 @@ namespace oosl{
 			ptr_type id_;
 			ptr_type init_;
 			entry_type static_value_;
+		};
+
+		class multiple_declaration : public declaration{
+		public:
+			using declaration::echo;
+
+			template <typename... args_type>
+			explicit multiple_declaration(args_type &&... args)
+				: declaration(std::forward<args_type>(args)...){}
+
+			virtual ~multiple_declaration();
+
+			virtual void echo(output_writer_type &writer) override;
 		};
 	}
 }

@@ -19,7 +19,6 @@ namespace oosl{
 			typedef typed_grammar<oosl::type::object::attribute> base_type;
 			typedef oosl::type::object::attribute type_attribute_type;
 
-			typedef boost::spirit::qi::rule<iterator_type, type_attribute_type(), skipper> custom_rule_type;
 			typedef boost::spirit::qi::symbols<char, type_attribute_type> specifier_symbols_type;
 
 			storage_specifier_grammar();
@@ -31,8 +30,8 @@ namespace oosl{
 			static std::string print_attributes(type_attribute_type value);
 
 		protected:
-			custom_rule_type static_rule_;
-			custom_rule_type thread_local_rule_;
+			rule_type static_rule_;
+			rule_type thread_local_rule_;
 			specifier_symbols_type static_symbols_;
 			specifier_symbols_type thread_local_symbols_;
 		};
