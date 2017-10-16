@@ -8,6 +8,7 @@
 #include <functional>
 #include <unordered_map>
 
+#include "tls.h"
 #include "../type/type_id.h"
 
 namespace oosl{
@@ -46,6 +47,7 @@ namespace oosl{
 			typedef runtime_info runtime_info_type;
 			typedef output_writer output_writer_type;
 
+			typedef oosl::common::tls tls_type;
 			typedef oosl::memory::manager memory_manager_type;
 			typedef oosl::driver::object driver_object_type;
 
@@ -98,6 +100,8 @@ namespace oosl{
 			virtual bool exiting() = 0;
 
 			virtual bool initializing() = 0;
+
+			virtual tls_type &tls() = 0;
 
 			virtual interpreter_info_type &interpreter_info() = 0;
 

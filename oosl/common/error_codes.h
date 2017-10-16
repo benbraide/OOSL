@@ -36,6 +36,8 @@ namespace oosl{
 			storage_not_found,
 			type_not_found,
 			out_of_bounds,
+			redefinition,
+			missing_initialization,
 		};
 	}
 }

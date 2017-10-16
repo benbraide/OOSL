@@ -41,6 +41,8 @@ namespace oosl{
 
 			virtual ptr_type reflect();
 
+			virtual ptr_type substitute(const std::string &key, ptr_type value);
+
 			virtual id_type id();
 
 			virtual index_type &index();
@@ -58,6 +60,8 @@ namespace oosl{
 			virtual storage_type *storage();
 
 			virtual type_object_type *type();
+
+			virtual ptr_type type_node();
 
 			virtual size_type count();
 

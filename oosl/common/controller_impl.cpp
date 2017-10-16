@@ -60,6 +60,10 @@ bool oosl::common::controller_impl::initializing(){
 	return OOSL_IS(states_, state_type::initializing);
 }
 
+oosl::common::controller::tls_type &oosl::common::controller_impl::tls(){
+	return tls_;
+}
+
 oosl::common::controller::interpreter_info_type &oosl::common::controller_impl::interpreter_info(){
 	throw error_codes::not_implemented;
 }
@@ -138,4 +142,4 @@ void oosl::common::controller_impl::exit(){
 
 thread_local oosl::common::controller::interpreter_info_type oosl::common::controller_impl::interpreter_info_{};
 
-thread_local oosl::common::controller::runtime_info_type oosl::common::controller_impl::runtime_info_{ oosl::storage::object::find_type::recursive };
+thread_local oosl::common::controller::runtime_info_type oosl::common::controller_impl::runtime_info_{oosl::common::runtime_state::nil, oosl::storage::object::find_type::recursive };

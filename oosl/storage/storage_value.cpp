@@ -4,6 +4,8 @@
 oosl::storage::value::value(object_type *arg)
 	: value_(arg){}
 
+oosl::storage::value::~value() = default;
+
 oosl::storage::value::entry_type *oosl::storage::value::object(){
 	return (is_object() ? &std::get<entry_type>(value_) : nullptr);
 }

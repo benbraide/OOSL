@@ -7,6 +7,10 @@ oosl::node::object::ptr_type oosl::node::object::reflect(){
 	return shared_from_this();
 }
 
+oosl::node::object::ptr_type oosl::node::object::substitute(const std::string &key, ptr_type value){
+	return reflect();
+}
+
 oosl::node::object::id_type oosl::node::object::id(){
 	throw error_type::not_implemented;
 }
@@ -50,6 +54,10 @@ oosl::node::object::type_object_type *oosl::node::object::type(){
 	auto &run_info = common::controller::active->runtime_info();
 	auto value = run_info.storage->find(key(), run_info.find_type);
 	return ((value == nullptr) ? nullptr : value->type());
+}
+
+oosl::node::object::ptr_type oosl::node::object::type_node(){
+	throw error_type::not_implemented;
 }
 
 oosl::node::object::size_type oosl::node::object::count(){

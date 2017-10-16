@@ -34,6 +34,8 @@ namespace oosl{
 
 			explicit value(object_type *arg);
 
+			virtual ~value();
+
 			entry_type *object();
 
 			type_object_type *type();

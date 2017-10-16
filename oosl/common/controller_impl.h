@@ -53,6 +53,8 @@ namespace oosl{
 
 			virtual bool initializing() override;
 
+			virtual tls_type &tls() override;
+
 			virtual interpreter_info_type &interpreter_info() override;
 
 			virtual runtime_info_type &runtime_info() override;
@@ -86,6 +88,7 @@ namespace oosl{
 			static thread_local runtime_info_type runtime_info_;
 
 			state_type states_;
+			tls_type tls_;
 			memory_manager_type memory_manager_;
 			temporary_storage_type internal_temporary_storage_;
 			named_storage_type global_storage_;
