@@ -38,6 +38,10 @@ namespace oosl{
 			out_of_bounds,
 			redefinition,
 			missing_initialization,
+			throw_,
+			break_,
+			continue_,
+			return_,
 		};
 	}
 }

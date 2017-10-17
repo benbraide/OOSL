@@ -108,3 +108,29 @@ oosl::lexer::grammar::node_ptr_type oosl::lexer::variadic_declaration_grammar::c
 		nullptr
 		);
 }
+
+oosl::lexer::function_declaration_grammar::function_declaration_grammar()
+	: grammar("OOSL_FUNCTION_DECLARATION"){
+	using namespace boost::spirit;
+
+	list_rule_ %= ((parameter_declaration_ % ",") >> *("," >> parameter_init_declaration_) >> -("," >> variadic_declaration_));
+	partial_list_rule_ %= ((parameter_init_declaration_ % ",") >> -("," >> variadic_declaration_));
+	optional_rule_ %= -variadic_declaration_;
+
+	base_ = (-storage_specifier_ >> (void_type_ | return_type_) >> identifier_or_placeholder_ >> '(' >> (list_rule_ | partial_list_rule_ | optional_rule_) >> ')')
+		[qi::_val = boost::phoenix::bind(&create, qi::_1, qi::_2, qi::_3, qi::_4)];
+
+	no_params_ = (-storage_specifier_ >> (void_type_ | return_type_) >> identifier_or_placeholder_ >> '(' >> -void_type_ >> ')')
+		[qi::_val = boost::phoenix::bind(&create_no_params, qi::_1, qi::_2, qi::_3)];
+
+	start_ %= (base_ | no_params_);
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::function_declaration_grammar::create(boost::optional<storage_attribute_type> attributes, node_ptr_type type,
+	node_ptr_type id, const params_type &params){
+	return nullptr;
+}
+
+oosl::lexer::grammar::node_ptr_type oosl::lexer::function_declaration_grammar::create_no_params(boost::optional<storage_attribute_type> attributes, node_ptr_type type, node_ptr_type id){
+	return create(attributes, type, id, boost::none);
+}

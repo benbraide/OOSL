@@ -86,6 +86,36 @@ namespace oosl{
 			variadic_type_grammar type_;
 			identifier_or_placeholder_grammar identifier_or_placeholder_;
 		};
+
+		class function_declaration_grammar : public grammar{
+		public:
+			typedef oosl::type::object::attribute storage_attribute_type;
+			typedef std::vector<node_ptr_type> node_ptr_list_type;
+
+			typedef boost::spirit::qi::rule<iterator_type, node_ptr_list_type(), skipper> list_rule_type;
+			typedef boost::spirit::qi::rule<iterator_type, boost::optional<node_ptr_type>(), skipper> optional_rule_type;
+			typedef boost::variant<node_ptr_list_type, boost::optional<node_ptr_type>> params_type;
+
+			function_declaration_grammar();
+
+			static node_ptr_type create(boost::optional<storage_attribute_type> attributes, node_ptr_type type, node_ptr_type id, const params_type &params);
+
+			static node_ptr_type create_no_params(boost::optional<storage_attribute_type> attributes, node_ptr_type type, node_ptr_type id);
+
+		protected:
+			rule_type base_;
+			rule_type no_params_;
+			list_rule_type list_rule_;
+			list_rule_type partial_list_rule_;
+			optional_rule_type optional_rule_;
+			void_type_grammar void_type_;
+			return_type_grammar return_type_;
+			identifier_or_placeholder_grammar identifier_or_placeholder_;
+			parameter_declaration_grammar parameter_declaration_;
+			parameter_init_declaration_grammar parameter_init_declaration_;
+			variadic_declaration_grammar variadic_declaration_;
+			storage_specifier_grammar storage_specifier_;
+		};
 	}
 }
 

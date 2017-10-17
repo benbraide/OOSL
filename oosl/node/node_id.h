@@ -32,6 +32,8 @@ namespace oosl{
 			return_,
 			break_,
 			continue_,
+			case_,
+			default_,
 			if_,
 			unless,
 			conditional,

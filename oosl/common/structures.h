@@ -33,6 +33,7 @@ namespace oosl{
 			oosl::storage::value *tls_value;
 			oosl::node::object::ptr_type decl_init;
 			unsigned __int64 address_offset;
+			oosl::storage::entry *exception_value;
 		};
 
 		OOSL_MAKE_OPERATORS(runtime_state);
